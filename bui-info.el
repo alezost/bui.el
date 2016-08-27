@@ -378,7 +378,7 @@ See `insert-text-button' for the meaning of PROPERTIES."
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
   "Parent mode for displaying data in 'info' form.")
 
-(defun bui-info-mode-initialize ()
+(defun bui-info-mode-initialize (_entry-type)
   "Set up the current 'info' buffer."
   ;; Without this, syntactic fontification is performed, and it may
   ;; break highlighting.  For example, if there is a single "
@@ -404,8 +404,7 @@ The rest keyword arguments are passed to
          (group              (intern prefix))
          (format-var         (intern (concat prefix "-format"))))
     (bui-plist-let args
-        ((show-entries-val   :show-entries-function)
-         (format-val         :format))
+        ((format-val         :format))
       `(progn
          (defcustom ,format-var ,format-val
            ,(format "\
@@ -442,14 +441,8 @@ After calling each METHOD, a new line is inserted."
            :type 'sexp
            :group ',group)
 
-         ,(if show-entries-val
-              `(bui-define-interface ,entry-type info
-                 :show-entries-function ,show-entries-val
-                 ,@%foreign-args)
-
-            `(bui-define-interface ,entry-type info
-               :mode-init-function 'bui-info-mode-initialize
-               ,@%foreign-args))))))
+         (bui-define-interface ,entry-type info
+           ,@%foreign-args)))))
 
 
 (defvar bui-info-font-lock-keywords

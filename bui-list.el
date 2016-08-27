@@ -462,8 +462,7 @@ The rest keyword arguments are passed to
          (list-single-var    (intern (concat prefix "-show-single")))
          (marks-var          (intern (concat prefix "-marks"))))
     (bui-plist-let args
-        ((show-entries-val   :show-entries-function)
-         (describe-val       :describe-function)
+        ((describe-val       :describe-function)
          (describe-count-val :describe-count 10)
          (format-val         :format)
          (sort-key-val       :sort-key)
@@ -532,22 +531,8 @@ you will be prompted for confirmation.  See also
            ,(format "Function used to describe '%s' entries."
                     entry-type-str))
 
-         ,(if show-entries-val
-              `(bui-define-interface ,entry-type list
-                 :show-entries-function ,show-entries-val
-                 ,@%foreign-args)
-
-            (let ((mode-init-fun (intern (concat prefix "-mode-initialize"))))
-              `(progn
-                 (defun ,mode-init-fun ()
-                   ,(format "\
-Set up the current 'list' buffer for displaying '%s' entries."
-                            entry-type-str)
-                   (bui-list-mode-initialize ',entry-type))
-
-                 (bui-define-interface ,entry-type list
-                   :mode-init-function ',mode-init-fun
-                   ,@%foreign-args))))))))
+         (bui-define-interface ,entry-type list
+           ,@%foreign-args)))))
 
 
 (defvar bui-list-font-lock-keywords

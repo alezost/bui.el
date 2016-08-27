@@ -170,11 +170,15 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
   "Turn on major mode to display ENTRY-TYPE ENTRIES in BUFFER-TYPE buffer."
   (funcall (bui-symbol-value entry-type buffer-type 'mode-function)))
 
+(defun bui-initialize-mode-default (entry-type buffer-type)
+  "Default function to set up BUFFER-TYPE buffer for ENTRY-TYPE entries."
+  (funcall (bui-make-symbol 'bui buffer-type 'mode-initialize)
+           entry-type))
+
 (defun bui-initialize-mode (entry-type buffer-type)
   "Set up the current BUFFER-TYPE buffer to display ENTRY-TYPE entries."
-  (--when-let (bui-symbol-value entry-type buffer-type
-                                'mode-initialize-function)
-    (funcall it)))
+  (funcall (bui-symbol-value entry-type buffer-type
+                             'mode-initialize-function)))
 
 (defun bui-insert-entries (entries entry-type buffer-type)
   "Show ENTRY-TYPE ENTRIES in the current BUFFER-TYPE buffer."
@@ -416,6 +420,7 @@ Optional keywords:
          (get-entries-var    (intern (concat prefix "-get-entries-function")))
          (show-entries-var   (intern (concat prefix "-show-entries-function")))
          (show-entries-fun   (intern (concat prefix "-show-entries")))
+         (mode-init-fun      (intern (concat prefix "-mode-initialize")))
          (message-var        (intern (concat prefix "-message-function")))
          (buffer-name-var    (intern (concat prefix "-buffer-name")))
          (titles-var         (intern (concat prefix "-titles")))
@@ -504,6 +509,15 @@ Show '%s' ENTRIES in the current '%s' buffer."
                      (bui-show-entries-default
                       entries ',entry-type ',buffer-type)))
 
+               ,(unless mode-init-val
+                  `(defun ,mode-init-fun ()
+                     ,(format "\
+Wrapper for `bui-initialize-mode-default'.
+Call it with '%s' ENTRY-TYPE and '%s' BUFFER-TYPE."
+                              entry-type-str buffer-type-str)
+                     (bui-initialize-mode-default
+                      ',entry-type ',buffer-type)))
+
                ,(when (or mode-name
                           mode-init-val
                           (null show-entries-val))
@@ -524,7 +538,8 @@ Show '%s' ENTRIES in the current '%s' buffer."
 Major mode for displaying '%s' entries in '%s' buffer."
                                   entry-type-str buffer-type-str))
 
-                       (defvar ,mode-init-var ,mode-init-val
+                       (defvar ,mode-init-var
+                         ,(or mode-init-val `',mode-init-fun)
                          ,(format "\
 Function used to set up '%s' buffer for displaying '%s' entries."
                                   buffer-type-str entry-type-str))
