@@ -379,13 +379,10 @@ Required keywords:
   - `:get-entries-function' - default value of the generated
     `TYPE-get-entries-function' variable.
 
+Optional keywords:
+
   - `:show-entries-function' - default value of the generated
     `TYPE-show-entries-function' variable.
-
-  Alternatively, if `:show-entries-function' is not specified, a
-  default `TYPE-show-entries' will be generated.
-
-Optional keywords:
 
   - `:buffer-name' - default value of the generated
     `TYPE-buffer-name' variable.
@@ -420,6 +417,12 @@ Optional keywords:
          (get-entries-var    (intern (concat prefix "-get-entries-function")))
          (show-entries-var   (intern (concat prefix "-show-entries-function")))
          (show-entries-fun   (intern (concat prefix "-show-entries")))
+         (mode-str           (concat prefix "-mode"))
+         (mode-map-str       (concat mode-str "-map"))
+         (mode               (intern mode-str))
+         (parent-mode        (intern (concat "bui-" buffer-type-str "-mode")))
+         (mode-var           (intern (concat mode-str "-function")))
+         (mode-init-var      (intern (concat mode-str "-initialize-function")))
          (mode-init-fun      (intern (concat prefix "-mode-initialize")))
          (message-var        (intern (concat prefix "-message-function")))
          (buffer-name-var    (intern (concat prefix "-buffer-name")))
@@ -470,6 +473,15 @@ Function used to receive '%s' entries for '%s' buffer."
 Function used to show '%s' entries in '%s' buffer."
                           entry-type-str buffer-type-str))
 
+               ,(unless show-entries-val
+                  `(defun ,show-entries-fun (entries)
+                     ,(format "\
+Wrapper for `bui-show-entries-default'.
+Call it with '%s' ENTRY-TYPE and '%s' BUFFER-TYPE."
+                              entry-type-str buffer-type-str)
+                     (bui-show-entries-default
+                      entries ',entry-type ',buffer-type)))
+
                (defvar ,message-var ,message-val
                  ,(format "\
 Function used to display a message after showing '%s' entries.
@@ -501,13 +513,16 @@ If non-nil, ask to confirm for reverting `%S' buffer."
                  :type 'boolean
                  :group ',group)
 
-               ,(unless show-entries-val
-                  `(defun ,show-entries-fun (entries)
-                     ,(format "\
-Show '%s' ENTRIES in the current '%s' buffer."
-                              entry-type-str buffer-type-str)
-                     (bui-show-entries-default
-                      entries ',entry-type ',buffer-type)))
+               (defvar ,mode-var ',mode
+                  ,(format "\
+Major mode for displaying '%s' entries in '%s' buffer."
+                           entry-type-str buffer-type-str))
+
+               (defvar ,mode-init-var
+                 ,(or mode-init-val `',mode-init-fun)
+                 ,(format "\
+Function used to set up '%s' buffer for displaying '%s' entries."
+                          buffer-type-str entry-type-str))
 
                ,(unless mode-init-val
                   `(defun ,mode-init-fun ()
@@ -518,44 +533,18 @@ Call it with '%s' ENTRY-TYPE and '%s' BUFFER-TYPE."
                      (bui-initialize-mode-default
                       ',entry-type ',buffer-type)))
 
-               ,(when (or mode-name
-                          mode-init-val
-                          (null show-entries-val))
-                  (let* ((mode-str      (concat prefix "-mode"))
-                         (mode-map-str  (concat mode-str "-map"))
-                         (mode          (intern mode-str))
-                         (parent-mode   (intern
-                                         (concat "bui-" buffer-type-str
-                                                 "-mode")))
-                         (mode-var      (intern
-                                         (concat mode-str "-function")))
-                         (mode-init-var (intern
-                                         (concat mode-str
-                                                 "-initialize-function"))))
-                    `(progn
-                       (defvar ,mode-var ',mode
-                         ,(format "\
-Major mode for displaying '%s' entries in '%s' buffer."
-                                  entry-type-str buffer-type-str))
-
-                       (defvar ,mode-init-var
-                         ,(or mode-init-val `',mode-init-fun)
-                         ,(format "\
-Function used to set up '%s' buffer for displaying '%s' entries."
-                                  buffer-type-str entry-type-str))
-
-                       (define-derived-mode ,mode ,parent-mode ,mode-name
-                         ,(format "\
+               (define-derived-mode ,mode ,parent-mode ,mode-name
+                 ,(format "\
 Major mode for displaying '%s' entries in '%s' buffer.
 
 \\{%s}"
-                                  entry-type-str buffer-type-str mode-map-str)
-                         (setq-local revert-buffer-function 'bui-revert)
-                         (setq-local bui-history-size
-                                     (bui-history-size ',entry-type
-                                                       ',buffer-type))
-                         (bui-initialize-mode ',entry-type
-                                              ',buffer-type)))))))))))
+                          entry-type-str buffer-type-str mode-map-str)
+                 (setq-local revert-buffer-function 'bui-revert)
+                 (setq-local bui-history-size
+                             (bui-history-size ',entry-type
+                                               ',buffer-type))
+                 (bui-initialize-mode ',entry-type
+                                      ',buffer-type))))))))
 
 
 (defvar bui-font-lock-keywords
