@@ -537,15 +537,8 @@ you will be prompted for confirmation.  See also
                  :show-entries-function ,show-entries-val
                  ,@%foreign-args)
 
-            (let ((insert-fun    (intern (concat prefix "-insert-entries")))
-                  (mode-init-fun (intern (concat prefix "-mode-initialize"))))
+            (let ((mode-init-fun (intern (concat prefix "-mode-initialize"))))
               `(progn
-                 (defun ,insert-fun (entries)
-                   ,(format "\
-Print '%s' ENTRIES in the current 'list' buffer."
-                            entry-type-str)
-                   (bui-list-insert-entries entries ',entry-type))
-
                  (defun ,mode-init-fun ()
                    ,(format "\
 Set up the current 'list' buffer for displaying '%s' entries."
@@ -553,7 +546,6 @@ Set up the current 'list' buffer for displaying '%s' entries."
                    (bui-list-mode-initialize ',entry-type))
 
                  (bui-define-interface ,entry-type list
-                   :insert-entries-function ',insert-fun
                    :mode-init-function ',mode-init-fun
                    ,@%foreign-args))))))))
 

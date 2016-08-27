@@ -447,18 +447,9 @@ After calling each METHOD, a new line is inserted."
                  :show-entries-function ,show-entries-val
                  ,@%foreign-args)
 
-            (let ((insert-fun (intern (concat prefix "-insert-entries"))))
-              `(progn
-                 (defun ,insert-fun (entries)
-                   ,(format "\
-Print '%s' ENTRIES in the current 'info' buffer."
-                            entry-type-str)
-                   (bui-info-insert-entries entries ',entry-type))
-
-                 (bui-define-interface ,entry-type info
-                   :insert-entries-function ',insert-fun
-                   :mode-init-function 'bui-info-mode-initialize
-                   ,@%foreign-args))))))))
+            `(bui-define-interface ,entry-type info
+               :mode-init-function 'bui-info-mode-initialize
+               ,@%foreign-args))))))
 
 
 (defvar bui-info-font-lock-keywords

@@ -178,9 +178,8 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
 
 (defun bui-insert-entries (entries entry-type buffer-type)
   "Show ENTRY-TYPE ENTRIES in the current BUFFER-TYPE buffer."
-  (funcall (bui-symbol-value entry-type buffer-type
-                             'insert-entries-function)
-           entries))
+  (funcall (bui-make-symbol 'bui buffer-type 'insert-entries)
+           entries entry-type))
 
 (defun bui-show-entries-default (entries entry-type buffer-type)
   "Default function to show ENTRY-TYPE ENTRIES in the BUFFER-TYPE buffer."
@@ -380,11 +379,7 @@ Required keywords:
     `TYPE-show-entries-function' variable.
 
   Alternatively, if `:show-entries-function' is not specified, a
-  default `TYPE-show-entries' will be generated, and the
-  following keyword should be specified instead:
-
-  - `:insert-entries-function' - default value of the generated
-    `TYPE-insert-function' variable.
+  default `TYPE-show-entries' will be generated.
 
 Optional keywords:
 
@@ -429,7 +424,6 @@ Optional keywords:
     (bui-plist-let args
         ((get-entries-val    :get-entries-function)
          (show-entries-val   :show-entries-function)
-         (insert-entries-val :insert-entries-function)
          (mode-name          :mode-name (capitalize prefix))
          (mode-init-val      :mode-init-function)
          (message-val        :message-function)
@@ -509,15 +503,6 @@ Show '%s' ENTRIES in the current '%s' buffer."
                               entry-type-str buffer-type-str)
                      (bui-show-entries-default
                       entries ',entry-type ',buffer-type)))
-
-               ,(when (or insert-entries-val
-                          (null show-entries-val))
-                  (let ((insert-entries-var
-                         (intern (concat prefix "-insert-entries-function"))))
-                    `(defvar ,insert-entries-var ,insert-entries-val
-                       ,(format "\
-Function used to print '%s' entries in '%s' buffer."
-                                entry-type-str buffer-type-str))))
 
                ,(when (or mode-name
                           mode-init-val
