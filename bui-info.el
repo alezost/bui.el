@@ -208,7 +208,7 @@ ENTRY-TYPE is a type of ENTRY."
   (pcase format-spec
     ((pred functionp)
      (funcall format-spec entry)
-     (insert "\n"))
+     (bui-newline))
     (`(,param ,title-method ,value-method)
      (let ((value (bui-entry-value entry param)))
        (unless (and bui-info-ignore-empty-values (null value))
@@ -217,7 +217,7 @@ ENTRY-TYPE is a type of ENTRY."
                (insert-value (bui-info-value-method->function value-method)))
            (funcall insert-title title)
            (funcall insert-value value entry)
-           (insert "\n")))))
+           (bui-newline)))))
     (_ (error "Unknown format specification '%S'" format-spec))))
 
 (defun bui-info-insert-title-simple (title &optional face)
@@ -268,7 +268,7 @@ window, depending on `bui-info-fill', and each line is indented
 with `bui-info-indent'.
 
 For the meaning of BUTTON-OR-FACE, see `bui-info-insert-value-simple'."
-  (when value (insert "\n"))
+  (when value (bui-newline))
   (bui-info-insert-value-simple value button-or-face bui-info-indent))
 
 (defun bui-info-insert-value-format (value &optional button-or-face

@@ -22,6 +22,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'dash)
 
 (defvar bui-true-string "Yes")
 (defvar bui-false-string "–")
@@ -101,6 +102,12 @@ add both to the end and to the beginning."
 
 ;;; Inserting text
 
+;; `bui-newline' exists because `newline' does too much.
+(defun bui-newline (&optional n)
+  "Insert N (1 by default) number of newlines at point."
+  (--dotimes (or n 1)
+    (insert "\n")))
+
 (defmacro bui-with-indent (indent &rest body)
   "Evaluate BODY and indent inserted text by INDENT number of spaces."
   (declare (indent 1) (debug t))
@@ -147,7 +154,7 @@ shouldn't be exceeded by the inserted text."
                  (save-excursion
                    (delete-region before-sep-pos after-sep-pos)
                    (goto-char before-sep-pos)
-                   (insert "\n")))))))))))
+                   (bui-newline)))))))))))
 
 (defun bui-split-insert (value &optional face column separator)
   "Convert VALUE into a string, split it and insert at point.
