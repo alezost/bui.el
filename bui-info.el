@@ -206,6 +206,8 @@ of `bui-info-indent' spaces."
 ENTRY is alist with parameters and their values.
 ENTRY-TYPE is a type of ENTRY."
   (pcase format-spec
+    ((pred null)
+     (bui-newline))
     ((pred functionp)
      (funcall format-spec entry)
      (bui-newline))
@@ -408,12 +410,15 @@ The rest keyword arguments are passed to
          (defcustom ,format-var ,format-val
            ,(format "\
 List of methods for inserting '%s' entry.
-Each METHOD should be either a function or should have the
-following form:
+Each METHOD should be either nil, a function or a list.
 
-  (PARAM INSERT-TITLE INSERT-VALUE)
+If METHOD is nil, newline is inserted at this point.
 
 If METHOD is a function, it is called with an entry as argument.
+
+If METHOD is a list, it should have the following form:
+
+  (PARAM INSERT-TITLE INSERT-VALUE)
 
 PARAM is a name of '%s' entry parameter.
 
