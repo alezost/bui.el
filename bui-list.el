@@ -205,30 +205,35 @@ Parameters are taken from ENTRY-TYPE ENTRY."
 (defun bui-list-get-one-line (value &optional _)
   "Return one-line string from a multi-line string VALUE.
 VALUE may be nil."
-  (if value
-      (bui-get-one-line value)
-    (bui-get-string nil)))
+  (bui-get-non-nil value
+    (bui-get-one-line value)))
 
 (defun bui-list-get-time (seconds &optional _)
-  "Return formatted time string from SECONDS."
-  (bui-get-string (bui-get-time-string seconds)
-                  'bui-list-time))
+  "Return formatted time string from SECONDS.
+SECONDS may be nil."
+  (bui-get-non-nil seconds
+    (bui-get-string (bui-get-time-string seconds)
+                    'bui-list-time)))
 
 (defun bui-list-get-file-name (file-name &optional _)
-  "Return FILE-NAME button specification for `tabulated-list-entries'."
-  (list file-name
-        'face 'bui-list-file-name
-        'action (lambda (btn) (find-file (button-label btn)))
-        'follow-link t
-        'help-echo "Find file"))
+  "Return FILE-NAME button specification for `tabulated-list-entries'.
+FILE-NAME may be nil."
+  (bui-get-non-nil file-name
+    (list file-name
+          'face 'bui-list-file-name
+          'action (lambda (btn) (find-file (button-label btn)))
+          'follow-link t
+          'help-echo "Find file")))
 
 (defun bui-list-get-url (url &optional _)
-  "Return URL button specification for `tabulated-list-entries'."
-  (list url
-        'face 'bui-list-url
-        'action (lambda (btn) (browse-url (button-label btn)))
-        'follow-link t
-        'help-echo "Browse URL"))
+  "Return URL button specification for `tabulated-list-entries'.
+URL may be nil."
+  (bui-get-non-nil url
+    (list url
+          'face 'bui-list-url
+          'action (lambda (btn) (browse-url (button-label btn)))
+          'follow-link t
+          'help-echo "Browse URL")))
 
 
 ;;; 'List' lines
