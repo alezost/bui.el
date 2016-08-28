@@ -58,6 +58,13 @@ If FACE is non-nil, propertize returned string with this FACE."
         (propertize str 'font-lock-face face)
       str)))
 
+(defmacro bui-get-non-nil (&optional value &rest body)
+  "Return `bui-false-string' if VALUE is nil, evaluate BODY otherwise."
+  (declare (indent 1) (debug t))
+  `(if (null ,value)
+       bui-false-string
+     ,@body))
+
 (defun bui-get-time-string (seconds)
   "Return formatted time string from SECONDS.
 Use `bui-time-format'."
@@ -393,6 +400,7 @@ Optional keywords:
 (defvar bui-utils-font-lock-keywords
   (eval-when-compile
     `((,(rx "(" (group (or "bui-with-indent"
+                           "bui-get-non-nil"
                            "bui-plist-let"
                            "bui-define-groups"))
             symbol-end)
