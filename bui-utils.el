@@ -65,6 +65,13 @@ If FACE is non-nil, propertize returned string with this FACE."
        bui-false-string
      ,@body))
 
+(defmacro bui-insert-non-nil (&optional value &rest body)
+  "Insert `bui-false-string' if VALUE is nil, evaluate BODY otherwise."
+  (declare (indent 1) (debug t))
+  `(if (null ,value)
+       (insert bui-false-string)
+     ,@body))
+
 (defun bui-get-time-string (seconds)
   "Return formatted time string from SECONDS.
 Use `bui-time-format'."
@@ -172,8 +179,7 @@ If COLUMN is non-nil and result string is a one-line string
 longer than COLUMN, split it into several short lines.
 
 Separate inserted lines with SEPARATOR."
-  (if (null value)
-      (bui-format-insert nil)
+  (bui-insert-non-nil value
     (let ((strings (bui-split-string (bui-get-string value) column)))
       (bui-mapinsert (lambda (str)
                        (bui-format-insert str face))
@@ -401,6 +407,7 @@ Optional keywords:
   (eval-when-compile
     `((,(rx "(" (group (or "bui-with-indent"
                            "bui-get-non-nil"
+                           "bui-insert-non-nil"
                            "bui-plist-let"
                            "bui-define-groups"))
             symbol-end)
