@@ -190,11 +190,11 @@ Parameters are taken from ENTRY-TYPE ENTRY."
             (cdr entries)       ; > 1
             (bui-list-show-single-entry? entry-type)
             (null (bui-symbol-value entry-type 'info 'show-entries-function)))
-        (bui-display-entries entries entry-type 'list args 'add)
+        (bui-display-entries entries entry-type 'list args)
       (if (equal (bui-symbol-value entry-type 'info 'get-entries-function)
                  (bui-symbol-value entry-type 'list 'get-entries-function))
-          (bui-display-entries entries entry-type 'info args 'add)
-        (bui-get-display-entries entry-type 'info args 'add)))))
+          (bui-display-entries entries entry-type 'info args)
+        (bui-get-display-entries entry-type 'info args)))))
 
 (defun bui-list-insert-entries (entries entry-type)
   "Print ENTRY-TYPE ENTRIES in the current buffer."

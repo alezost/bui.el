@@ -247,15 +247,15 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
 
 (defun bui-history-item (buffer-item)
   "Make and return a history item for displaying BUFFER-ITEM."
-  (list #'bui-set buffer-item))
+  (list #'bui-set buffer-item 'no))
 
 (defun bui-set (buffer-item &optional history)
   "Set up the current buffer for displaying BUFFER-ITEM.
 HISTORY should be one of the following:
 
-  `nil' - do not save BUFFER-ITEM in history,
+  `nil' or `add' - add it to history,
 
-  `add' - add it to history,
+  `no' - do not save BUFFER-ITEM in history,
 
   `replace' - replace the current history item."
   (bui-with-item buffer-item
@@ -264,10 +264,10 @@ HISTORY should be one of the following:
       ;; be used by the code for displaying entries.
       (setq bui-item buffer-item)
       (bui-show-entries %entries %entry-type %buffer-type)
-      (when history
+      (unless (eq history 'no)
         (funcall (cl-ecase history
-                   (add     #'bui-history-add)
-                   (replace #'bui-history-replace))
+                   ((nil add) #'bui-history-add)
+                   (replace   #'bui-history-replace))
                  (bui-history-item buffer-item))))
     (bui-message %entries %entry-type %buffer-type %args)))
 
@@ -335,7 +335,7 @@ This function does not update the buffer data, use
          ;; windows display the same buffer.
          (window (car (get-buffer-window-list (current-buffer) nil t)))
          (window-start (and window (window-start window))))
-    (bui-set bui-item)
+    (bui-set bui-item 'no)
     (goto-char old-point)
     (run-hooks 'bui-after-redisplay-hook)
     (when window
