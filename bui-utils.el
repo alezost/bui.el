@@ -24,13 +24,26 @@
 (require 'cl-lib)
 (require 'dash)
 
-(defvar bui-true-string "Yes")
-(defvar bui-false-string "–")
-(defvar bui-list-separator ", ")
+(defcustom bui-true-string "Yes"
+  "String used if a parameter value is t."
+  :type 'string
+  :group 'bui)
 
-(defvar bui-time-format "%F %T"
+(defcustom bui-false-string "–"
+  "String used if a parameter value is nil."
+  :type 'string
+  :group 'bui)
+
+(defcustom bui-list-separator ", "
+  "String used to seprate list values."
+  :type 'string
+  :group 'bui)
+
+(defcustom bui-time-format "%F %T"
   "String used to format time values.
-For possible formats, see `format-time-string'.")
+For possible formats, see `format-time-string'."
+  :type 'string
+  :group 'bui)
 
 
 ;;; String utils
