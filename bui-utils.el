@@ -205,8 +205,9 @@ See `insert-text-button' for the meaning of PROPERTIES."
   "Make BUTTON-TYPE button(s) from VALUE.
 Return a string with button(s).
 
-VALUE can be nil, a string or a list of strings.  If it is a list
-of strings, buttons are separated with SEPARATOR string.
+VALUE can be nil, a button name (string or symbol) or a list of
+button names.  If it is a list, buttons are separated with
+SEPARATOR string.
 
 PROPERTIES are passed to `bui-insert-button'."
   (bui-get-non-nil value
@@ -214,7 +215,10 @@ PROPERTIES are passed to `bui-insert-button'."
       (let ((labels (if (listp value) value (list value))))
         (bui-mapinsert (lambda (label)
                          (apply #'bui-insert-button
-                                label button-type properties))
+                                (if (symbolp label)
+                                    (symbol-name label)
+                                  label)
+                                button-type properties))
                        labels
                        separator))
       (buffer-substring (point-min) (point-max)))))
