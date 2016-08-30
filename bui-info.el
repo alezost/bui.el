@@ -73,7 +73,12 @@
   :group 'bui-info-faces)
 
 (defcustom bui-info-ignore-empty-values nil
-  "If non-nil, do not display parameters with nil values."
+  "If non-nil, do not display non-boolean parameters with nil values."
+  :type 'boolean
+  :group 'bui-info)
+
+(defcustom bui-info-ignore-void-values t
+  "If non-nil, do not display non-existing parameters."
   :type 'boolean
   :group 'bui-info)
 
@@ -212,18 +217,21 @@ ENTRY-TYPE is a type of ENTRY."
      (funcall format-spec entry)
      (bui-newline))
     (`(,param ,title-method ,value-method)
-     (let ((boolean? (bui-boolean-param? entry-type 'info param))
-           (value    (bui-entry-value entry param)))
-       (unless (and bui-info-ignore-empty-values
-                    (null value)
-                    (not boolean?))
+     (let* ((value    (bui-entry-value entry param))
+            (void?    (bui-void-value? value))
+            (empty?   (null value))
+            (boolean? (bui-boolean-param? entry-type 'info param)))
+       (unless (or (and bui-info-ignore-void-values void?)
+                   (and bui-info-ignore-empty-values
+                        empty? (not boolean?)))
          (let ((title        (bui-info-param-title entry-type param))
                (insert-title (bui-info-title-method->function title-method))
                (insert-value (bui-info-value-method->function value-method)))
            (funcall insert-title title)
-           (if (and boolean? (null value))
-               (insert bui-false-string)
-             (funcall insert-value value entry))
+           (cond
+            (void? (insert bui-empty-string))
+            ((and empty? boolean?) (insert bui-false-string))
+            (t (funcall insert-value value entry)))
            (bui-newline)))))
     (_ (error "Unknown format specification '%S'" format-spec))))
 

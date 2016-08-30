@@ -25,7 +25,19 @@
 (require 'dash)
 (require 'bui-utils)
 
-(defalias 'bui-entry-value #'bui-assq-value)
+(defvar bui-void-value 'VOID
+  "Value returned by `bui-entry-value' if a parameter does not exist.")
+
+(defun bui-void-value? (value)
+  "Return non-nil, if VALUE is `bui-void-value'."
+  (eq value bui-void-value))
+
+(defun bui-entry-value (entry param)
+  "Return value of the ENTRY PARAM.
+If ENTRY does not have PARAM at all, return `bui-void-value'."
+  (--if-let (assq param entry)
+      (cdr it)
+    bui-void-value))
 
 (defun bui-entry-id (entry)
   "Return ENTRY ID."

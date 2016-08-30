@@ -175,13 +175,14 @@ Parameters are taken from ENTRY-TYPE ENTRY."
   (bui-list-tabulated-vector
    entry-type
    (lambda (param fun &rest _)
-     (let ((val (bui-entry-value entry param)))
-       (if fun
-           (funcall fun val entry)
-         (if (and (null val)
-                  (bui-boolean-param? entry-type 'list param))
-             bui-false-string
-           (bui-get-string val)))))))
+     (let ((value (bui-entry-value entry param)))
+       (cond
+        ((bui-void-value? value) bui-empty-string)
+        (fun (funcall fun value entry))
+        ((and (null value)
+              (bui-boolean-param? entry-type 'list param))
+         bui-false-string)
+        (t (bui-get-string value)))))))
 
 
 ;;; Displaying entries
