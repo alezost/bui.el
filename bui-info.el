@@ -306,9 +306,10 @@ BUTTON-OR-FACE is a button type)."
     (bui-split-insert value face fill-col
                       (concat "\n" bui-info-multiline-prefix))))
 
-(defun bui-info-insert-time (seconds &optional face)
-  "Insert formatted time string using SECONDS at point."
-  (bui-format-insert (bui-get-time-string seconds)
+(defun bui-info-insert-time (time &optional face)
+  "Insert formatted time string using TIME at point.
+See `bui-get-time-string' for the meaning of TIME."
+  (bui-format-insert (bui-get-time-string time)
                      (or face 'bui-info-time)))
 
 

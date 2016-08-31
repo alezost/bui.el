@@ -85,10 +85,15 @@ If FACE is non-nil, propertize returned string with this FACE."
        (insert bui-false-string)
      ,@body))
 
-(defun bui-get-time-string (seconds)
-  "Return formatted time string from SECONDS.
-Use `bui-time-format'."
-  (format-time-string bui-time-format (seconds-to-time seconds)))
+(defun bui-get-time-string (time)
+  "Return formatted time string from TIME using `bui-time-format'.
+TIME can be either a time value (list), a number of seconds, or a
+time string."
+  (let ((time (cond ((listp time) time)
+                    ((numberp time) (seconds-to-time time))
+                    ((stringp time) (date-to-time time))
+                    (t (error "Unknown time format: %S" time)))))
+    (format-time-string bui-time-format time)))
 
 (defun bui-get-one-line (str)
   "Return one-line string from a multi-line STR."

@@ -208,11 +208,11 @@ VALUE may be nil."
   (bui-get-non-nil value
     (bui-get-one-line value)))
 
-(defun bui-list-get-time (seconds &optional _)
-  "Return formatted time string from SECONDS.
-SECONDS may be nil."
-  (bui-get-non-nil seconds
-    (bui-get-string (bui-get-time-string seconds)
+(defun bui-list-get-time (time &optional _)
+  "Return formatted time string from TIME.
+TIME may be nil or another value supported by `bui-get-time-string'."
+  (bui-get-non-nil time
+    (bui-get-string (bui-get-time-string time)
                     'bui-list-time)))
 
 (defun bui-list-get-file-name (file-name &optional _)
