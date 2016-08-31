@@ -98,9 +98,9 @@ With prefix argument, describe entries marked with any mark."
   (bui-list-value entry-type 'describe-warning-count))
 
 (defun bui-list-describe-entries (entry-type ids)
-  "Describe ENTRY-TYPE entries with IDS in 'info' buffer"
-  (funcall (bui-list-value entry-type 'describe-function)
-           ids))
+  "Describe ENTRY-TYPE entries with IDS in 'info' buffer."
+  (apply (bui-list-value entry-type 'describe-function)
+         ids))
 
 
 ;;; Tabulated list internals
@@ -535,7 +535,8 @@ you will be prompted for confirmation.  See also
            :group ',group)
 
          (defvar ,describe-var ,describe-val
-           ,(format "Function used to describe '%s' entries."
+           ,(format "Function used to describe '%s' entries.
+It is applied to the entries IDs as the rest arguments."
                     entry-type-str))
 
          (bui-define-interface ,entry-type list
