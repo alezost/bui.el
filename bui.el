@@ -228,6 +228,10 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
                       param)
       (bui-symbol-title param)))
 
+(defun bui-boolean-param? (entry-type buffer-type param)
+  "Return non-nil if PARAM for BUFFER-TYPE/ENTRY-TYPE is boolean."
+  (memq param (bui-symbol-value entry-type buffer-type 'boolean-params)))
+
 (defun bui-history-size (entry-type buffer-type)
   "Return history size for BUFFER-TYPE/ENTRY-TYPE."
   (bui-symbol-value entry-type buffer-type 'history-size))
@@ -405,6 +409,9 @@ Optional keywords:
   - `:mode-init-function' - default value of the generated
     `TYPE-mode-initialize-function' variable.
 
+  - `:boolean-params' - default value of the generated
+    `TYPE-boolean-params' variable.
+
   - `:reduced?' - if non-nil, generate only group, faces group
     and titles variable (if specified); all keywords become
     optional."
@@ -426,6 +433,7 @@ Optional keywords:
          (mode-init-fun      (intern (concat prefix "-mode-initialize")))
          (message-var        (intern (concat prefix "-message-function")))
          (buffer-name-var    (intern (concat prefix "-buffer-name")))
+         (boolean-params-var (intern (concat prefix "-boolean-params")))
          (titles-var         (intern (concat prefix "-titles")))
          (history-size-var   (intern (concat prefix "-history-size")))
          (revert-confirm-var (intern (concat prefix "-revert-confirm"))))
@@ -436,6 +444,7 @@ Optional keywords:
          (mode-init-val      :mode-init-function)
          (message-val        :message-function)
          (buffer-name-val    :buffer-name)
+         (boolean-params-val :boolean-params)
          (titles-val         :titles)
          (history-size-val   :history-size 20)
          (revert-confirm-val :revert-confirm? t)
@@ -459,6 +468,14 @@ Optional keywords:
                     entry-type-str)
            :type '(alist :key-type symbol :value-type string)
            :group ',group)
+
+         (defvar ,boolean-params-var ,boolean-params-val
+           ,(format "\
+List of boolean '%s' parameters for '%s' buffer.
+These parameters are displayed using `bui-false-string' for
+nil values (unlike usual parameters which are displayed using
+`bui-empty-string')."
+                    entry-type-str buffer-type-str))
 
          ,(unless reduced?
             `(progn

@@ -178,7 +178,10 @@ Parameters are taken from ENTRY-TYPE ENTRY."
      (let ((val (bui-entry-value entry param)))
        (if fun
            (funcall fun val entry)
-         (bui-get-string val))))))
+         (if (and (null val)
+                  (bui-boolean-param? entry-type 'list param))
+             bui-false-string
+           (bui-get-string val)))))))
 
 
 ;;; Displaying entries

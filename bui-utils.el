@@ -25,12 +25,17 @@
 (require 'dash)
 
 (defcustom bui-true-string "Yes"
-  "String used if a parameter value is t."
+  "String used if the value of a parameter is t."
   :type 'string
   :group 'bui)
 
-(defcustom bui-false-string "–"
-  "String used if a parameter value is nil."
+(defcustom bui-false-string "No"
+  "String used if the value of a boolean parameter is nil."
+  :type 'string
+  :group 'bui)
+
+(defcustom bui-empty-string "—"
+  "String used if the value of a non-boolean parameter is nil."
   :type 'string
   :group 'bui)
 
@@ -53,14 +58,14 @@ For possible formats, see `format-time-string'."
 
 VALUE can be an expression of any type.
 If VALUE is t/nil, it is replaced with
-`bui-true-string'/`bui-false-string'.
+`bui-true-string'/`bui-empty-string'.
 If VALUE is list, its elements are concatenated using
 `bui-list-separator'.
 
 If FACE is non-nil, propertize returned string with this FACE."
   (let ((str (cond
               ((stringp value) value)
-              ((null value) bui-false-string)
+              ((null value) bui-empty-string)
               ((eq t value) bui-true-string)
               ((numberp value) (number-to-string value))
               ((listp value) (mapconcat #'bui-get-string
@@ -72,17 +77,17 @@ If FACE is non-nil, propertize returned string with this FACE."
       str)))
 
 (defmacro bui-get-non-nil (&optional value &rest body)
-  "Return `bui-false-string' if VALUE is nil, evaluate BODY otherwise."
+  "Return `bui-empty-string' if VALUE is nil, evaluate BODY otherwise."
   (declare (indent 1) (debug t))
   `(if (null ,value)
-       bui-false-string
+       bui-empty-string
      ,@body))
 
 (defmacro bui-insert-non-nil (&optional value &rest body)
-  "Insert `bui-false-string' if VALUE is nil, evaluate BODY otherwise."
+  "Insert `bui-empty-string' if VALUE is nil, evaluate BODY otherwise."
   (declare (indent 1) (debug t))
   `(if (null ,value)
-       (insert bui-false-string)
+       (insert bui-empty-string)
      ,@body))
 
 (defun bui-get-time-string (time)
