@@ -464,8 +464,9 @@ Optional keywords:
            :group ',(intern (concat "bui-" buffer-type-str "-faces")))
 
          (defcustom ,titles-var ,titles-val
-           ,(format "Alist of titles of '%s' parameters."
-                    entry-type-str)
+           ,(format "\
+Alist of titles of '%s' parameters for '%s' buffer."
+                    entry-type-str buffer-type-str)
            :type '(alist :key-type symbol :value-type string)
            :group ',group)
 
