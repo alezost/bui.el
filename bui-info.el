@@ -88,25 +88,33 @@ If nil, insert text parameters in a raw form."
   :type 'boolean
   :group 'bui-info)
 
-(defvar bui-info-param-title-format "%-18s: "
+(defcustom bui-info-param-title-format "%-18s: "
   "String used to format a title of a parameter.
 It should be a '%s'-sequence.  After inserting a title formatted
 with this string, a value of the parameter is inserted.
-This string is used by `bui-info-insert-title-format'.")
+This string is used by `bui-info-insert-title-format'."
+  :type 'string
+  :group 'bui-info)
 
-(defvar bui-info-multiline-prefix
+(defcustom bui-info-multiline-prefix
   (make-string (length (format bui-info-param-title-format " "))
                ?\s)
   "String used to format multi-line parameter values.
 If a value occupies more than one line, this string is inserted
 in the beginning of each line after the first one.
-This string is used by `bui-info-insert-value-format'.")
+This string is used by `bui-info-insert-value-format'."
+  :type 'string
+  :group 'bui-info)
 
-(defvar bui-info-indent 2
-  "Number of spaces used to indent various parts of inserted text.")
+(defcustom bui-info-indent 2
+  "Number of spaces used to indent various parts of inserted text."
+  :type 'integer
+  :group 'bui-info)
 
-(defvar bui-info-delimiter "\n\f\n"
-  "String used to separate entries.")
+(defcustom bui-info-delimiter "\n\f\n"
+  "String used to separate entries."
+  :type 'string
+  :group 'bui-info)
 
 
 ;;; Wrappers for 'info' variables
