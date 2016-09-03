@@ -144,6 +144,48 @@ See `bui-define-current-args-accessor' for details."
                           ,i ,prefix ,name))))
 
 
+;;; Overriding variables
+
+(defvar bui-variables-suffixes
+  '(true-string
+    false-string
+    empty-string
+    list-separator
+    time-format)
+  "Variables with these suffixes will be generated.
+See `bui-define-interface' for details.")
+
+(defun bui-set-local-variables (suffixes entry-type &optional buffer-type)
+  "Set BUI variables according to ENTRY-TYPE/BUFFER-TYPE variables."
+  (dolist (suffix suffixes)
+    (let ((val (if buffer-type
+                   (bui-symbol-value entry-type buffer-type suffix)
+                 (bui-entry-symbol-value entry-type suffix))))
+      (when val
+        (let ((var (if buffer-type
+                       (bui-make-symbol 'bui buffer-type suffix)
+                     (bui-make-symbol 'bui suffix))))
+          (set (make-local-variable var) val))))))
+
+(defun bui-defcustom-clause (suffix entry-type &optional buffer-type)
+  "Return `defcustom' clause for `ENTRY-TYPE-BUFFER-TYPE-SUFFIX' variable."
+  (let ((var     (if buffer-type
+                     (bui-symbol entry-type buffer-type suffix)
+                   (bui-entry-symbol entry-type suffix)))
+        (bui-var (if buffer-type
+                     (bui-make-symbol 'bui buffer-type suffix)
+                   (bui-make-symbol 'bui suffix)))
+        (group   (if buffer-type
+                     (bui-symbol entry-type buffer-type)
+                   entry-type)))
+    `(defcustom ,var nil
+       ,(concat (documentation-property bui-var 'variable-documentation)
+                (format "\nIf nil, use `%S'." bui-var))
+       :type '(choice ,(get bui-var 'custom-type)
+                      (const nil))
+       :group ',group)))
+
+
 ;;; Wrappers for defined variables
 
 (defalias 'bui-entry-symbol #'bui-make-symbol)
@@ -172,6 +214,7 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
 
 (defun bui-initialize-mode-default (entry-type buffer-type)
   "Default function to set up BUFFER-TYPE buffer for ENTRY-TYPE entries."
+  (bui-set-local-variables bui-variables-suffixes entry-type)
   (funcall (bui-make-symbol 'bui buffer-type 'mode-initialize)
            entry-type))
 
@@ -363,15 +406,26 @@ This function does not update the buffer data, use
 ARGS can be the same arguments as for `bui-define-interface'.
 The difference is: arguments for `bui-define-interface' define
 specific variables for different buffer types, while this macro
-defines general variables used for any buffer type."
+defines general variables used for any buffer type.
+
+Also if `:reduced' is nil, this macro generates
+`ENTRY-TYPE-SUFFIX' variables for each SUFFIX from
+`bui-variables-suffixes'."
   (declare (indent 1))
-  `(progn
-     ,@(bui-map-plist
-        (lambda (key val)
-          `(defvar ,(bui-make-symbol entry-type
-                                     (bui-keyword->symbol key))
-             ,val))
-        args)))
+  (bui-plist-let args
+      ((reduced? :reduced?))
+    `(progn
+       ,@(unless reduced?
+           (mapcar (lambda (suffix)
+                     (bui-defcustom-clause suffix entry-type))
+                   bui-variables-suffixes))
+
+       ,@(bui-map-plist
+          (lambda (key val)
+            `(defvar ,(bui-make-symbol entry-type
+                                       (bui-keyword->symbol key))
+               ,val))
+          %foreign-args))))
 
 (defmacro bui-define-interface (entry-type buffer-type &rest args)
   "Define BUFFER-TYPE interface for displaying ENTRY-TYPE entries.

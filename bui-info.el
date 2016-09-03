@@ -116,6 +116,17 @@ This string is used by `bui-info-insert-value-format'."
   :type 'string
   :group 'bui-info)
 
+(defvar bui-info-variables-suffixes
+  '(ignore-empty-values
+    ignore-void-values
+    fill
+    param-title-format
+    multiline-prefix
+    indent
+    delimiter)
+  "Variables with these suffixes will be generated.
+See `bui-define-info-interface' for details.")
+
 
 ;;; Wrappers for 'info' variables
 
@@ -400,8 +411,9 @@ See `insert-text-button' for the meaning of PROPERTIES."
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
   "Parent mode for displaying data in 'info' form.")
 
-(defun bui-info-mode-initialize (_entry-type)
+(defun bui-info-mode-initialize (entry-type)
   "Set up the current 'info' buffer."
+  (bui-set-local-variables bui-info-variables-suffixes entry-type 'info)
   ;; Without this, syntactic fontification is performed, and it may
   ;; break highlighting.  For example, if there is a single "
   ;; (double-quote) character, the default syntactic fontification
@@ -419,14 +431,19 @@ Required keywords:
     `ENTRY-TYPE-info-format' variable.
 
 The rest keyword arguments are passed to
-`bui-define-interface' macro."
+`bui-define-interface' macro.
+
+Also if `:reduced' is nil, this macro generates
+`ENTRY-TYPE-info-SUFFIX' variables for each SUFFIX from
+`bui-info-variables-suffixes'."
   (declare (indent 1))
   (let* ((entry-type-str     (symbol-name entry-type))
          (prefix             (concat entry-type-str "-info"))
          (group              (intern prefix))
          (format-var         (intern (concat prefix "-format"))))
     (bui-plist-let args
-        ((format-val         :format))
+        ((format-val         :format)
+         (reduced?           :reduced?))
       `(progn
          (defcustom ,format-var ,format-val
            ,(format "\
@@ -463,7 +480,13 @@ After calling each METHOD, a new line is inserted."
            :type 'sexp
            :group ',group)
 
+         ,@(unless reduced?
+             (mapcar (lambda (suffix)
+                       (bui-defcustom-clause suffix entry-type 'info))
+                     bui-info-variables-suffixes))
+
          (bui-define-interface ,entry-type info
+           :reduced? ,reduced?
            ,@%foreign-args)))))
 
 
