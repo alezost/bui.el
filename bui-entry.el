@@ -39,6 +39,11 @@ If ENTRY does not have PARAM at all, return `bui-void-value'."
       (cdr it)
     bui-void-value))
 
+(defun bui-entry-non-void-value (entry param)
+  "Like `bui-entry-value' but return nil if value is void."
+  (--when-let (bui-entry-value entry param)
+    (and (not (bui-void-value? it)) it)))
+
 (defun bui-entry-id (entry)
   "Return ENTRY ID."
   (bui-entry-value entry 'id))
