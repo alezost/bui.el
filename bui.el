@@ -33,6 +33,8 @@
 
 (defvar bui-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-b") 'bui-history-back)
+    (define-key map (kbd "C-c C-f") 'bui-history-forward)
     (define-key map (kbd "l") 'bui-history-back)
     (define-key map (kbd "r") 'bui-history-forward)
     (define-key map (kbd "g") 'revert-buffer)
