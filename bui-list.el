@@ -418,6 +418,7 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
     (define-key map (kbd "u")   'bui-list-unmark)
     (define-key map (kbd "DEL") 'bui-list-unmark-backward)
     (define-key map (kbd "U")   'bui-list-unmark-all)
+    (define-key map (kbd "s")   'bui-list-sort)
     (define-key map [remap tabulated-list-sort] 'bui-list-sort)
     map)
   "Keymap for `bui-list-mode' buffers.")
