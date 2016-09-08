@@ -39,6 +39,7 @@
     (define-key map (kbd "r") 'bui-history-forward)
     (define-key map (kbd "g") 'revert-buffer)
     (define-key map (kbd "R") 'bui-redisplay)
+    (define-key map (kbd "f") 'bui-filter-map)
     map)
   "Parent keymap for all BUI modes.")
 
@@ -146,6 +147,69 @@ See `bui-define-current-args-accessor' for details."
                           ,i ,prefix ,name))))
 
 
+;;; Filtering
+
+(defvar bui-filter-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "f") 'bui-enable-filter)
+    (define-key map (kbd "d") 'bui-disable-filters)
+    map)
+  "Keymap with filter commands for BUI modes.")
+(fset 'bui-filter-map bui-filter-map)
+
+(defvar-local bui-active-filter-predicates nil
+  "List of the active filter predicates.
+These predicates are used to hide unneeded entries from the
+current buffer.  Each buffer entry is passed (as a single
+argument) through these predicates in turn.  If a predicate
+returns nil, the entry will be hidden (the rest predicates are
+not called), otherwise the entry \"survives\" this predicate and
+it is passed to the next one, and so on.")
+(put 'bui-active-filter-predicates 'permanent-local t)
+
+(defun bui-filter-current-entries (&rest predicates)
+  "Filter the current entries using PREDICATES, and redisplay them.
+If PREDICATES are not specified, display all entries."
+  (setq bui-active-filter-predicates predicates)
+  (bui-show-entries (bui-current-entries)
+                    (bui-current-entry-type)
+                    (bui-current-buffer-type)))
+
+(defun bui-enable-filter (predicate &optional single?)
+  "Apply filter PREDICATE to the current entries.
+Interactively, prompt for PREDICATE, choosing candidates from the
+available predicates.
+
+If SINGLE? is non-nil (with prefix argument), make PREDICATE the
+only active one (remove the other active predicates)."
+  (interactive
+   (list (intern (completing-read
+                  (if current-prefix-arg
+                      "Enable single filter predicate: "
+                    "Add filter predicate: ")
+                  (bui-available-filter-predicates
+                   (bui-current-entry-type)
+                   (bui-current-buffer-type))))
+         current-prefix-arg))
+  (or (functionp predicate)
+      (error "Wrong filter predicate: %S" predicate))
+  (if (if single?
+          (equal (list predicate) bui-active-filter-predicates)
+        (memq predicate bui-active-filter-predicates))
+      (message "Filter predicate '%S' already enabled" predicate)
+    (apply #'bui-filter-current-entries
+           (if single?
+               (list predicate)
+             (cons predicate bui-active-filter-predicates)))))
+
+(defun bui-disable-filters ()
+  "Disable all active filters."
+  (interactive)
+  (if (null bui-active-filter-predicates)
+      (message "There are no active filters.")
+    (bui-filter-current-entries)))
+
+
 ;;; Overriding variables
 
 (defvar bui-variables-suffixes
@@ -235,7 +299,13 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
   (let ((inhibit-read-only t))
     (erase-buffer)
     (bui-enable-mode entry-type buffer-type)
-    (bui-insert-entries entries entry-type buffer-type)
+    (let ((filtered-entries (apply #'bui-filter
+                                   entries bui-active-filter-predicates)))
+      (if filtered-entries
+          (bui-insert-entries filtered-entries entry-type buffer-type)
+        (message (substitute-command-keys
+                  "Everything is filtered out :-)
+Use '\\[bui-disable-filters]' to remove filters"))))
     (goto-char (point-min))))
 
 (defun bui-show-entries (entries entry-type buffer-type)
@@ -272,6 +342,10 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
       (bui-assq-value (bui-entry-symbol-value entry-type 'titles)
                       param)
       (bui-symbol-title param)))
+
+(defun bui-available-filter-predicates (entry-type buffer-type)
+  "Return available filter predicates for ENTRY-TYPE/BUFFER-TYPE."
+  (bui-symbol-value entry-type buffer-type 'filter-predicates))
 
 (defun bui-boolean-param? (entry-type buffer-type param)
   "Return non-nil if PARAM for BUFFER-TYPE/ENTRY-TYPE is boolean."
@@ -453,6 +527,9 @@ Optional keywords:
   - `:titles' - default value of the generated
     `TYPE-titles' variable.
 
+  - `:filter-predicates' - default value of the generated
+    `TYPE-filter-predicates' variable.
+
   - `:history-size' - default value of the generated
     `TYPE-history-size' variable.
 
@@ -489,6 +566,7 @@ Optional keywords:
          (mode-init-fun      (intern (concat prefix "-mode-initialize")))
          (message-var        (intern (concat prefix "-message-function")))
          (buffer-name-var    (intern (concat prefix "-buffer-name")))
+         (filter-preds-var   (intern (concat prefix "-filter-predicates")))
          (boolean-params-var (intern (concat prefix "-boolean-params")))
          (titles-var         (intern (concat prefix "-titles")))
          (history-size-var   (intern (concat prefix "-history-size")))
@@ -500,6 +578,7 @@ Optional keywords:
          (mode-init-val      :mode-init-function)
          (message-val        :message-function)
          (buffer-name-val    :buffer-name)
+         (filter-preds-val   :filter-predicates)
          (boolean-params-val :boolean-params)
          (titles-val         :titles)
          (history-size-val   :history-size 20)
@@ -570,6 +649,16 @@ function is called with the same arguments as `%S'.  If nil, the
 name is defined automatically."
                           buffer-type-str entry-type-str get-entries-var)
                  :type '(choice string function)
+                 :group ',group)
+
+               (defcustom ,filter-preds-var ,filter-preds-val
+                 ,(format "\
+List of available filter predicates for '%s' entries.
+These predicates are used as completions for
+'\\[bui-enable-filter]' command to hide entries from '%s'
+buffer. See `bui-active-filter-predicates' for details."
+                          entry-type-str buffer-type-str)
+                 :type '(repeat function)
                  :group ',group)
 
                (defcustom ,history-size-var ,history-size-val

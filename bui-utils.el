@@ -385,6 +385,15 @@ accessed with KEYS."
 
 ;;; Misc
 
+(defun bui-filter (list &rest predicates)
+  "Apply PREDICATES to all elements from LIST.
+Return a list of elements which satisfy all the PREDICATES."
+  (if (null predicates)
+      list
+    (-filter (lambda (element)
+               (--every? (funcall it element) predicates))
+             list)))
+
 (defun bui-copy-as-kill (string &optional no-message?)
   "Put STRING into `kill-ring'.
 If NO-MESSAGE? is non-nil, do not display a message about it."
