@@ -48,17 +48,17 @@ If ENTRY does not have PARAM at all, return `bui-void-value'."
   "Return ENTRY ID."
   (bui-entry-value entry 'id))
 
-(defun bui-entry-by-id (id entries)
+(defun bui-entry-by-id (entries id)
   "Return an entry from ENTRIES by its ID."
   (--find (equal (bui-entry-id it) id)
           entries))
 
-(defun bui-entries-by-ids (ids entries)
+(defun bui-entries-by-ids (entries ids)
   "Return entries with IDS (a list of identifiers) from ENTRIES."
   (--filter (member (bui-entry-id it) ids)
             entries))
 
-(defun bui-replace-entry (id new-entry entries)
+(defun bui-replace-entry (entries id new-entry)
   "Replace an entry with ID from ENTRIES by NEW-ENTRY.
 Return a list of entries with the replaced entry."
   (--map-first (equal id (bui-entry-id it))

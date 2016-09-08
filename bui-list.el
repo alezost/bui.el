@@ -249,8 +249,8 @@ URL may be nil."
 
 (defun bui-list-current-entry ()
   "Return entry at point."
-  (bui-entry-by-id (bui-list-current-id)
-                   (bui-current-entries)))
+  (bui-entry-by-id (bui-current-entries)
+                   (bui-list-current-id)))
 
 (defun bui-list-for-each-line (fun &rest args)
   "Call FUN with ARGS for each entry line."
