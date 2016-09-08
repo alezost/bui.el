@@ -269,7 +269,7 @@ See `bui-define-interface' for details.")
    (bui-symbol-if-bound (bui-entry-symbol entry-type symbol))))
 
 (defun bui-symbol-value (entry-type buffer-type symbol)
-  "Return SYMBOL's value for BUFFER-TYPE/ENTRY-TYPE."
+  "Return SYMBOL's value for ENTRY-TYPE/BUFFER-TYPE."
   (or (symbol-value (bui-symbol-if-bound
                      (bui-symbol entry-type buffer-type symbol)))
       (bui-entry-symbol-value entry-type symbol)))
@@ -342,7 +342,7 @@ Use '\\[bui-disable-filters]' to remove filters"))))
               "*")))))
 
 (defun bui-param-title (entry-type buffer-type param)
-  "Return PARAM title for BUFFER-TYPE/ENTRY-TYPE."
+  "Return PARAM title for ENTRY-TYPE/BUFFER-TYPE."
   (or (bui-assq-value (bui-symbol-value entry-type buffer-type 'titles)
                       param)
       (bui-assq-value (bui-entry-symbol-value entry-type 'titles)
@@ -354,15 +354,15 @@ Use '\\[bui-disable-filters]' to remove filters"))))
   (bui-symbol-value entry-type buffer-type 'filter-predicates))
 
 (defun bui-boolean-param? (entry-type buffer-type param)
-  "Return non-nil if PARAM for BUFFER-TYPE/ENTRY-TYPE is boolean."
+  "Return non-nil if PARAM for ENTRY-TYPE/BUFFER-TYPE is boolean."
   (memq param (bui-symbol-value entry-type buffer-type 'boolean-params)))
 
 (defun bui-history-size (entry-type buffer-type)
-  "Return history size for BUFFER-TYPE/ENTRY-TYPE."
+  "Return history size for ENTRY-TYPE/BUFFER-TYPE."
   (bui-symbol-value entry-type buffer-type 'history-size))
 
 (defun bui-revert-confirm? (entry-type buffer-type)
-  "Return 'revert-confirm' value for BUFFER-TYPE/ENTRY-TYPE."
+  "Return 'revert-confirm' value for ENTRY-TYPE/BUFFER-TYPE."
   (bui-symbol-value entry-type buffer-type 'revert-confirm))
 
 
