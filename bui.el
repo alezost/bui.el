@@ -157,6 +157,12 @@ See `bui-define-current-args-accessor' for details."
   "Keymap with filter commands for BUI modes.")
 (fset 'bui-filter-map bui-filter-map)
 
+(defcustom bui-filter-mode-line-string "(f)"
+  "String displayed in the mode line when filters are enabled.
+Set it to nil, if you don't want to display such a string."
+  :type '(choice string (const nil))
+  :group 'bui)
+
 (defvar-local bui-active-filter-predicates nil
   "List of the active filter predicates.
 These predicates are used to hide unneeded entries from the
@@ -696,7 +702,9 @@ Call it with '%s' ENTRY-TYPE and '%s' BUFFER-TYPE."
                      (bui-initialize-mode-default
                       ',entry-type ',buffer-type)))
 
-               (define-derived-mode ,mode ,parent-mode ,mode-name
+               (define-derived-mode ,mode ,parent-mode
+                 '(,mode-name (bui-active-filter-predicates
+                               bui-filter-mode-line-string))
                  ,(format "\
 Major mode for displaying '%s' entries in '%s' buffer.
 
