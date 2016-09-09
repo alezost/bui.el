@@ -58,6 +58,13 @@ If ENTRY does not have PARAM at all, return `bui-void-value'."
   (--filter (member (bui-entry-id it) ids)
             entries))
 
+(defun bui-entry-by-param (entries param value &optional compare)
+  "Return an entry from ENTRIES with PARAM's value equal VALUE.
+The values are compared using COMPARE function (`equal' by default)."
+  (or compare (setq compare #'equal))
+  (--find (funcall compare (bui-entry-value it param) value)
+          entries))
+
 (defun bui-replace-entry (entries id new-entry)
   "Replace an entry with ID from ENTRIES by NEW-ENTRY.
 Return a list of entries with the replaced entry."
