@@ -23,6 +23,7 @@
 
 ;;; Code:
 
+(require 'cus-edit)             ; for button faces
 (require 'dash)
 (require 'bui)
 (require 'bui-entry)
@@ -57,18 +58,12 @@
   :group 'bui-info-faces)
 
 (defface bui-info-action-button
-  '((((type x w32 ns) (class color))
-     :box (:line-width 2 :style released-button)
-     :background "lightgrey" :foreground "black")
-    (t :inherit button))
+  '((t :inherit custom-button))
   "Face used for action buttons."
   :group 'bui-info-faces)
 
 (defface bui-info-action-button-mouse
-  '((((type x w32 ns) (class color))
-     :box (:line-width 2 :style released-button)
-     :background "grey90" :foreground "black")
-    (t :inherit highlight))
+  '((t :inherit custom-button-mouse))
   "Mouse face used for action buttons."
   :group 'bui-info-faces)
 
