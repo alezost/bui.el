@@ -65,7 +65,7 @@ With prefix argument, describe entries marked with any mark."
 
 ;;; Wrappers for 'list' variables
 
-(defun bui-list-value (entry-type symbol)
+(defun bui-list-symbol-value (entry-type symbol)
   "Return SYMBOL's value for ENTRY-TYPE and 'list' buffer type."
   (bui-symbol-value entry-type 'list symbol))
 
@@ -75,7 +75,7 @@ With prefix argument, describe entries marked with any mark."
 
 (defun bui-list-format (entry-type)
   "Return column format for ENTRY-TYPE."
-  (bui-list-value entry-type 'format))
+  (bui-list-symbol-value entry-type 'format))
 
 (defun bui-list-displayed-params (entry-type)
   "Return a list of ENTRY-TYPE parameters that should be displayed."
@@ -83,23 +83,23 @@ With prefix argument, describe entries marked with any mark."
 
 (defun bui-list-sort-key (entry-type)
   "Return sort key for ENTRY-TYPE."
-  (bui-list-value entry-type 'sort-key))
+  (bui-list-symbol-value entry-type 'sort-key))
 
 (defun bui-list-additional-marks (entry-type)
   "Return alist of additional marks for ENTRY-TYPE."
-  (bui-list-value entry-type 'marks))
+  (bui-list-symbol-value entry-type 'marks))
 
 (defun bui-list-show-single-entry? (entry-type)
   "Return non-nil, if a single entry of ENTRY-TYPE should be listed."
-  (bui-list-value entry-type 'show-single))
+  (bui-list-symbol-value entry-type 'show-single))
 
 (defun bui-list-describe-warning-count (entry-type)
   "Return the maximum number of ENTRY-TYPE entries to describe."
-  (bui-list-value entry-type 'describe-warning-count))
+  (bui-list-symbol-value entry-type 'describe-warning-count))
 
 (defun bui-list-describe-entries (entry-type ids)
   "Describe ENTRY-TYPE entries with IDS in 'info' buffer."
-  (apply (bui-list-value entry-type 'describe-function)
+  (apply (bui-list-symbol-value entry-type 'describe-function)
          ids))
 
 
