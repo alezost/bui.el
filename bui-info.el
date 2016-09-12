@@ -228,8 +228,7 @@ ENTRY-TYPE is a type of ENTRY."
     ((pred null)
      (bui-newline))
     ((pred functionp)
-     (funcall format-spec entry)
-     (bui-newline))
+     (funcall format-spec entry))
     (`(,param ,title-method ,value-method)
      (let* ((value    (bui-entry-value entry param))
             (void?    (bui-void-value? value))
@@ -469,8 +468,10 @@ and entry as arguments.  If it is a list, it should have a
 form (FUN-OR-ALIAS [ARGS ...]), in which case FUN-OR-ALIAS is
 called with value and ARGS as arguments.
 
-Parameters are inserted in the same order as defined by this list.
-After calling each METHOD, a new line is inserted."
+After inserting title/value with such a list METHOD, a new line
+is inserted.
+
+Parameters are inserted in the same order as defined by this list."
                     entry-type-str entry-type-str)
            :type 'sexp
            :group ',group)
