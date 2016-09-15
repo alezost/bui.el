@@ -292,8 +292,10 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
 
 (defun bui-initialize-mode (entry-type buffer-type)
   "Set up the current BUFFER-TYPE buffer to display ENTRY-TYPE entries."
-  (funcall (bui-symbol-value entry-type buffer-type
-                             'mode-initialize-function)))
+  (--if-let (bui-symbol-value entry-type buffer-type
+                              'mode-initialize-function)
+      (funcall it)
+    (bui-initialize-mode-default entry-type buffer-type)))
 
 (defun bui-insert-entries (entries entry-type buffer-type)
   "Show ENTRY-TYPE ENTRIES in the current BUFFER-TYPE buffer."
@@ -316,9 +318,10 @@ Use '\\[bui-disable-filters]' to remove filters"))))
 
 (defun bui-show-entries (entries entry-type buffer-type)
   "Show ENTRY-TYPE ENTRIES in the current BUFFER-TYPE buffer."
-  (funcall (bui-symbol-value entry-type buffer-type
-                             'show-entries-function)
-           entries))
+  (--if-let (bui-symbol-value entry-type buffer-type
+                              'show-entries-function)
+      (funcall it entries)
+    (bui-show-entries-default entries entry-type buffer-type)))
 
 (defun bui-message (entries entry-type buffer-type args)
   "Display a message for BUFFER-ITEM after showing entries."
@@ -562,14 +565,12 @@ Optional keywords:
          (faces-group        (intern (concat prefix "-faces")))
          (get-entries-var    (intern (concat prefix "-get-entries-function")))
          (show-entries-var   (intern (concat prefix "-show-entries-function")))
-         (show-entries-fun   (intern (concat prefix "-show-entries")))
          (mode-str           (concat prefix "-mode"))
          (mode-map-str       (concat mode-str "-map"))
          (mode               (intern mode-str))
          (parent-mode        (intern (concat "bui-" buffer-type-str "-mode")))
          (mode-var           (intern (concat mode-str "-function")))
          (mode-init-var      (intern (concat mode-str "-initialize-function")))
-         (mode-init-fun      (intern (concat prefix "-mode-initialize")))
          (message-var        (intern (concat prefix "-message-function")))
          (buffer-name-var    (intern (concat prefix "-buffer-name")))
          (filter-preds-var   (intern (concat prefix "-filter-predicates")))
@@ -626,20 +627,10 @@ nil values (unlike usual parameters which are displayed using
 Function used to receive '%s' entries for '%s' buffer."
                           entry-type-str buffer-type-str))
 
-               (defvar ,show-entries-var
-                 ,(or show-entries-val `',show-entries-fun)
+               (defvar ,show-entries-var ,show-entries-val
                  ,(format "\
 Function used to show '%s' entries in '%s' buffer."
                           entry-type-str buffer-type-str))
-
-               ,(unless show-entries-val
-                  `(defun ,show-entries-fun (entries)
-                     ,(format "\
-Wrapper for `bui-show-entries-default'.
-Call it with '%s' ENTRY-TYPE and '%s' BUFFER-TYPE."
-                              entry-type-str buffer-type-str)
-                     (bui-show-entries-default
-                      entries ',entry-type ',buffer-type)))
 
                (defvar ,message-var ,message-val
                  ,(format "\
@@ -687,20 +678,10 @@ If non-nil, ask to confirm for reverting `%S' buffer."
 Major mode for displaying '%s' entries in '%s' buffer."
                            entry-type-str buffer-type-str))
 
-               (defvar ,mode-init-var
-                 ,(or mode-init-val `',mode-init-fun)
+               (defvar ,mode-init-var ,mode-init-val
                  ,(format "\
 Function used to set up '%s' buffer for displaying '%s' entries."
                           buffer-type-str entry-type-str))
-
-               ,(unless mode-init-val
-                  `(defun ,mode-init-fun ()
-                     ,(format "\
-Wrapper for `bui-initialize-mode-default'.
-Call it with '%s' ENTRY-TYPE and '%s' BUFFER-TYPE."
-                              entry-type-str buffer-type-str)
-                     (bui-initialize-mode-default
-                      ',entry-type ',buffer-type)))
 
                (define-derived-mode ,mode ,parent-mode
                  '(,mode-name (bui-active-filter-predicates
