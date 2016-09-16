@@ -125,6 +125,10 @@ See `bui-define-info-interface' for details.")
 
 ;;; Wrappers for 'info' variables
 
+(defun bui-info-symbol (entry-type symbol)
+  "Return symbol for ENTRY-TYPE and 'info' buffer type."
+  (bui-symbol entry-type 'info symbol))
+
 (defun bui-info-symbol-value (entry-type symbol)
   "Return SYMBOL's value for ENTRY-TYPE and 'info' buffer type."
   (bui-symbol-value entry-type 'info symbol))

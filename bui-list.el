@@ -65,6 +65,10 @@ With prefix argument, describe entries marked with any mark."
 
 ;;; Wrappers for 'list' variables
 
+(defun bui-list-symbol (entry-type symbol)
+  "Return symbol for ENTRY-TYPE and 'list' buffer type."
+  (bui-symbol entry-type 'list symbol))
+
 (defun bui-list-symbol-value (entry-type symbol)
   "Return SYMBOL's value for ENTRY-TYPE and 'list' buffer type."
   (bui-symbol-value entry-type 'list symbol))
