@@ -286,6 +286,7 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
 
 (defun bui-initialize-mode-default (entry-type buffer-type)
   "Default function to set up BUFFER-TYPE buffer for ENTRY-TYPE entries."
+  (setq-local revert-buffer-function 'bui-revert)
   (bui-set-local-variables bui-variables-suffixes entry-type)
   (funcall (bui-make-symbol 'bui buffer-type 'mode-initialize)
            entry-type))
@@ -691,7 +692,6 @@ Major mode for displaying '%s' entries in '%s' buffer.
 
 \\{%s}"
                           entry-type-str buffer-type-str mode-map-str)
-                 (setq-local revert-buffer-function 'bui-revert)
                  (setq-local bui-history-size
                              (bui-history-size ',entry-type
                                                ',buffer-type))
