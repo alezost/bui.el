@@ -437,6 +437,32 @@ Optional keywords:
            :group ',name
            :group ',parent-faces-group)))))
 
+(cl-defun bui-inherit-defvar-clause (symbol parent &key group
+                                            (value nil value-bound?))
+  "Return `defvar' clause for SYMBOL inheriting it from PARENT symbol.
+Take docstring and value (unless VALUE is specified) from PARENT.
+If custom GROUP is non-nil and PARENT symbol has custom type,
+return `defcustom' clause instead."
+  (let* ((val (if value-bound?
+                  value
+                (symbol-value parent)))
+         (val-null? (and value-bound? (null value)))
+         (doc (documentation-property parent 'variable-documentation))
+         (doc (if val-null?
+                  (concat doc (format "\nIf nil, use `%S'." parent))
+                doc))
+         (type (and group (get parent 'custom-type)))
+         (type (if (and val-null?
+                        type
+                        (not (eq type 'boolean)))
+                   `(choice ,type (const nil))
+                 type)))
+    (if type
+        `(defcustom ,symbol ,val ,doc
+           :type ',type
+           :group ',group)
+      `(defvar ,symbol ,val ,doc))))
+
 
 (defvar bui-utils-font-lock-keywords
   (eval-when-compile

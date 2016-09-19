@@ -67,6 +67,42 @@
   "Mouse face used for action buttons."
   :group 'bui-info-faces)
 
+
+;;; General 'info' variables
+
+(defvar bui-info-format nil
+  "List of methods for inserting entries.
+Each METHOD should be either nil, a function or a list.
+
+If METHOD is nil, newline is inserted at point.
+
+If METHOD is a function, it is called with an entry as argument.
+
+If METHOD is a list, it should have the following form:
+
+  (PARAM INSERT-TITLE INSERT-VALUE)
+
+PARAM is a name of the entry parameter.
+
+INSERT-TITLE may be either a symbol or a list.  If it is a
+symbol, it should be a function or an alias from
+`bui-info-title-aliases', in which case it is called with title
+as argument.  If it is a list, it should have a
+form (FUN-OR-ALIAS [ARGS ...]), in which case FUN-OR-ALIAS is
+called with title and ARGS as arguments.
+
+INSERT-VALUE may be either a symbol or a list.  If it is a
+symbol, it should be a function or an alias from
+`bui-info-value-aliases', in which case it is called with value
+and entry as arguments.  If it is a list, it should have a
+form (FUN-OR-ALIAS [ARGS ...]), in which case FUN-OR-ALIAS is
+called with value and ARGS as arguments.
+
+After inserting title/value with such a list METHOD, a new line
+is inserted.
+
+Parameters are inserted in the same order as defined by this list.")
+
 (defcustom bui-info-ignore-empty-values nil
   "If non-nil, do not display non-boolean parameters with nil values."
   :type 'boolean
@@ -111,16 +147,17 @@ This string is used by `bui-info-insert-value-format'."
   :type 'string
   :group 'bui-info)
 
-(defvar bui-info-variables-suffixes
-  '(ignore-empty-values
-    ignore-void-values
-    fill
-    param-title-format
-    multiline-prefix
-    indent
-    delimiter)
-  "Variables with these suffixes will be generated.
-See `bui-define-info-interface' for details.")
+(defconst bui-info-symbol-specifications
+  '((:delimiter delimiter t)
+    (:fill fill t)
+    (:format format always)
+    (:ignore-empty-values ignore-empty-values t)
+    (:ignore-void-values ignore-void-values t)
+    (:indent indent t)
+    (:multiline-prefix multiline-prefix t)
+    (:title-format param-title-format t))
+  "Specifications for generating 'info' variables.
+See `bui-symbol-specifications' for details.")
 
 
 ;;; Wrappers for 'info' variables
@@ -411,7 +448,9 @@ See `insert-text-button' for the meaning of PROPERTIES."
 
 (defun bui-info-mode-initialize (entry-type)
   "Set up the current 'info' buffer."
-  (bui-set-local-variables bui-info-variables-suffixes entry-type 'info)
+  (bui-set-local-variables entry-type 'info
+                           (mapcar #'bui-symbol-specification-suffix
+                                   bui-info-symbol-specifications))
   ;; Without this, syntactic fontification is performed, and it may
   ;; break highlighting.  For example, if there is a single "
   ;; (double-quote) character, the default syntactic fontification
@@ -422,72 +461,32 @@ See `insert-text-button' for the meaning of PROPERTIES."
 (defmacro bui-define-info-interface (entry-type &rest args)
   "Define 'info' interface for displaying ENTRY-TYPE entries.
 Remaining arguments (ARGS) should have a form [KEYWORD VALUE] ...
-
-Required keywords:
-
-  - `:format' - default value of the generated
-    `ENTRY-TYPE-info-format' variable.
+They are used to generate variables specific for the defined info
+interface.  For more details and the available keywords, see
+`bui-info-symbol-specifications'.
 
 The rest keyword arguments are passed to
-`bui-define-interface' macro.
-
-Also if `:reduced' is nil, this macro generates
-`ENTRY-TYPE-info-SUFFIX' variables for each SUFFIX from
-`bui-info-variables-suffixes'."
+`bui-define-interface' macro."
   (declare (indent 1))
   (let* ((entry-type-str     (symbol-name entry-type))
          (prefix             (concat entry-type-str "-info"))
-         (group              (intern prefix))
-         (format-var         (intern (concat prefix "-format"))))
+         (group              (intern prefix)))
     (bui-plist-let args
-        ((format-val         :format)
-         (reduced?           :reduced?))
+        ((reduced?           :reduced?))
       `(progn
-         (defcustom ,format-var ,format-val
-           ,(format "\
-List of methods for inserting '%s' entry.
-Each METHOD should be either nil, a function or a list.
-
-If METHOD is nil, newline is inserted at this point.
-
-If METHOD is a function, it is called with an entry as argument.
-
-If METHOD is a list, it should have the following form:
-
-  (PARAM INSERT-TITLE INSERT-VALUE)
-
-PARAM is a name of '%s' entry parameter.
-
-INSERT-TITLE may be either a symbol or a list.  If it is a
-symbol, it should be a function or an alias from
-`bui-info-title-aliases', in which case it is called with title
-as argument.  If it is a list, it should have a
-form (FUN-OR-ALIAS [ARGS ...]), in which case FUN-OR-ALIAS is
-called with title and ARGS as arguments.
-
-INSERT-VALUE may be either a symbol or a list.  If it is a
-symbol, it should be a function or an alias from
-`bui-info-value-aliases', in which case it is called with value
-and entry as arguments.  If it is a list, it should have a
-form (FUN-OR-ALIAS [ARGS ...]), in which case FUN-OR-ALIAS is
-called with value and ARGS as arguments.
-
-After inserting title/value with such a list METHOD, a new line
-is inserted.
-
-Parameters are inserted in the same order as defined by this list."
-                    entry-type-str entry-type-str)
-           :type 'sexp
-           :group ',group)
-
-         ,@(unless reduced?
-             (mapcar (lambda (suffix)
-                       (bui-defcustom-clause suffix entry-type 'info))
-                     bui-info-variables-suffixes))
+         ,@(bui-map-symbol-specifications
+            (lambda (key suffix generate)
+              (let ((val (plist-get args key)))
+                (when (or val (bui-symbol-generate? generate reduced?))
+                  (bui-inherit-defvar-clause
+                   (bui-info-symbol entry-type suffix)
+                   (bui-make-symbol 'bui-info suffix)
+                   :value val
+                   :group group))))
+            bui-info-symbol-specifications)
 
          (bui-define-interface ,entry-type info
-           :reduced? ,reduced?
-           ,@%foreign-args)))))
+           ,@args)))))
 
 
 (defvar bui-info-font-lock-keywords

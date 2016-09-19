@@ -47,6 +47,72 @@
   "Face used for time stamps."
   :group 'bui-list-faces)
 
+
+;;; General 'list' variables
+
+(defvar bui-list-format nil
+  "List of methods to get values of the displayed columns.
+Each element of the list has a form:
+
+  (PARAM VALUE-FUN WIDTH SORT . PROPS)
+
+PARAM is a name of an entry parameter.
+
+VALUE-FUN may be either nil or a function returning a value that
+will be inserted.  The function is called with 2 arguments: the
+first one is the value of the parameter; the second one is an
+entry (alist of parameter names and values).
+
+For the meaning of WIDTH, SORT and PROPS, see
+`tabulated-list-format'.")
+
+(defcustom bui-list-sort-key nil
+  "Default sort key for 'list' buffer.
+Should be nil (no sort) or have a form:
+
+  (PARAM . FLIP)
+
+PARAM is the name of an entry parameter.  For the meaning of
+FLIP, see `tabulated-list-sort-key'."
+  :type '(choice (const :tag "No sort" nil)
+                 (cons symbol boolean))
+  :group 'bui-list)
+
+(defvar bui-list-additional-marks nil
+  "Alist of additional marks for 'list' buffer.
+Marks from this list are used along with `bui-list-default-marks'.")
+
+(defcustom bui-list-show-single nil
+  "If non-nil, list an entry even if it is the only matching result.
+If nil, show a single entry in the 'info' buffer instead."
+  :type 'boolean
+  :group 'bui-list)
+
+(defcustom bui-list-describe-warning-count 10
+  "The maximum number of entries to describe without a warning.
+If you want to describe more than this number of marked entries,
+you will be prompted for confirmation.  See also
+`bui-list-describe'."
+  :type 'integer
+  :group 'bui-list)
+
+(defvar bui-list-describe-function nil
+  "Function used to describe entries.
+It is applied to the entries IDs as the rest arguments.")
+
+(defconst bui-list-symbol-specifications
+  '((:describe-function describe-function)
+    (:describe-count    describe-warning-count t)
+    (:format            format t)
+    (:list-single?      show-single t)
+    (:marks             additional-marks)
+    (:sort-key          sort-key t))
+  "Specifications for generating 'list' variables.
+See `bui-symbol-specifications' for details.")
+
+
+;;; Displaying 'info' buffer
+
 (defun bui-list-describe (&optional mark-names)
   "Describe entries marked with a general mark.
 'Describe' means display entries in 'info' buffer.
@@ -57,7 +123,7 @@ With prefix argument, describe entries marked with any mark."
                          (list (bui-list-current-id))))
          (count      (length ids))
          (entry-type (bui-current-entry-type)))
-    (when (or (<= count (bui-list-describe-warning-count entry-type))
+    (when (or (<= count bui-list-describe-warning-count)
               (y-or-n-p (format "Do you really want to describe %d entries? "
                                 count)))
       (bui-list-describe-entries entry-type ids))))
@@ -91,15 +157,11 @@ With prefix argument, describe entries marked with any mark."
 
 (defun bui-list-additional-marks (entry-type)
   "Return alist of additional marks for ENTRY-TYPE."
-  (bui-list-symbol-value entry-type 'marks))
+  (bui-list-symbol-value entry-type 'additional-marks))
 
 (defun bui-list-show-single-entry? (entry-type)
   "Return non-nil, if a single entry of ENTRY-TYPE should be listed."
   (bui-list-symbol-value entry-type 'show-single))
-
-(defun bui-list-describe-warning-count (entry-type)
-  "Return the maximum number of ENTRY-TYPE entries to describe."
-  (bui-list-symbol-value entry-type 'describe-warning-count))
 
 (defun bui-list-describe-entries (entry-type ids)
   "Describe ENTRY-TYPE entries with IDS in 'info' buffer."
@@ -435,121 +497,41 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
   (setq tabulated-list-padding  2
         tabulated-list-format   (bui-list-tabulated-format entry-type)
         tabulated-list-sort-key (bui-list-tabulated-sort-key entry-type))
+  (bui-set-local-variables entry-type 'list
+                           (mapcar #'bui-symbol-specification-suffix
+                                   bui-list-symbol-specifications))
   (setq-local bui-list-marks (bui-list-marks entry-type))
   (tabulated-list-init-header))
 
 (defmacro bui-define-list-interface (entry-type &rest args)
   "Define 'list' interface for displaying ENTRY-TYPE entries.
 Remaining arguments (ARGS) should have a form [KEYWORD VALUE] ...
-
-Required keywords:
-
-  - `:format' - default value of the generated
-    `ENTRY-TYPE-list-format' variable.
-
-Optional keywords:
-
-  - `:sort-key' - default value of the generated
-    `ENTRY-TYPE-list-sort-key' variable.
-
-  - `:describe-function' - default value of the generated
-    `ENTRY-TYPE-describe-function' variable.
-
-  - `:describe-count' - default value of the generated
-    `ENTRY-TYPE-describe-warning-count' variable.
-
-  - `:list-single?' - default value of the generated
-    `ENTRY-TYPE-list-show-single' variable.
-
-  - `:marks' - default value of the generated
-    `ENTRY-TYPE-list-marks' variable.
+They are used to generate variables specific for the defined info
+interface.  For more details and the available keywords, see
+`bui-info-symbol-specifications'.
 
 The rest keyword arguments are passed to
 `bui-define-interface' macro."
   (declare (indent 1))
   (let* ((entry-type-str     (symbol-name entry-type))
          (prefix             (concat entry-type-str "-list"))
-         (group              (intern prefix))
-         (describe-var       (intern (concat prefix "-describe-function")))
-         (describe-count-var (intern (concat prefix
-                                             "-describe-warning-count")))
-         (format-var         (intern (concat prefix "-format")))
-         (sort-key-var       (intern (concat prefix "-sort-key")))
-         (list-single-var    (intern (concat prefix "-show-single")))
-         (marks-var          (intern (concat prefix "-marks"))))
+         (group              (intern prefix)))
     (bui-plist-let args
-        ((describe-val       :describe-function)
-         (describe-count-val :describe-count 10)
-         (format-val         :format)
-         (sort-key-val       :sort-key)
-         (list-single-val    :list-single?)
-         (marks-val          :marks))
+        ((reduced?           :reduced?))
       `(progn
-         (defcustom ,format-var ,format-val
-           ,(format "\
-List of format values of the displayed columns.
-Each element of the list has a form:
-
-  (PARAM VALUE-FUN WIDTH SORT . PROPS)
-
-PARAM is a name of '%s' entry parameter.
-
-VALUE-FUN may be either nil or a function returning a value that
-will be inserted.  The function is called with 2 arguments: the
-first one is the value of the parameter; the second one is an
-entry (alist of parameter names and values).
-
-For the meaning of WIDTH, SORT and PROPS, see
-`tabulated-list-format'."
-                    entry-type-str)
-           :type 'sexp
-           :group ',group)
-
-         (defcustom ,sort-key-var ,sort-key-val
-           ,(format "\
-Default sort key for 'list' buffer with '%s' entries.
-Should be nil (no sort) or have a form:
-
-  (PARAM . FLIP)
-
-PARAM is the name of '%s' entry parameter.  For the meaning of
-FLIP, see `tabulated-list-sort-key'."
-                    entry-type-str entry-type-str)
-           :type '(choice (const :tag "No sort" nil)
-                          (cons symbol boolean))
-           :group ',group)
-
-         (defvar ,marks-var ,marks-val
-           ,(format "\
-Alist of additional marks for 'list' buffer with '%s' entries.
-Marks from this list are used along with `bui-list-default-marks'."
-                    entry-type-str))
-
-         (defcustom ,list-single-var ,list-single-val
-           ,(format "\
-If non-nil, list '%s' entry even if it is the only matching result.
-If nil, show a single '%s' entry in the 'info' buffer."
-                    entry-type-str entry-type-str)
-           :type 'boolean
-           :group ',group)
-
-         (defcustom ,describe-count-var ,describe-count-val
-           ,(format "\
-The maximum number of '%s' entries to describe without a warning.
-If you want to describe more than this number of marked entries,
-you will be prompted for confirmation.  See also
-`bui-list-describe'."
-                    entry-type-str)
-           :type 'integer
-           :group ',group)
-
-         (defvar ,describe-var ,describe-val
-           ,(format "Function used to describe '%s' entries.
-It is applied to the entries IDs as the rest arguments."
-                    entry-type-str))
+         ,@(bui-map-symbol-specifications
+            (lambda (key suffix generate)
+              (let ((val (plist-get %foreign-args key)))
+                (when (or val (bui-symbol-generate? generate reduced?))
+                  (bui-inherit-defvar-clause
+                   (bui-list-symbol entry-type suffix)
+                   (bui-make-symbol 'bui-list suffix)
+                   :value val
+                   :group group))))
+            bui-list-symbol-specifications)
 
          (bui-define-interface ,entry-type list
-           ,@%foreign-args)))))
+           ,@args)))))
 
 
 (defvar bui-list-font-lock-keywords

@@ -22,6 +22,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'dash)
 (require 'bui-history)
 (require 'bui-utils)
@@ -216,46 +217,139 @@ only active one (remove the other active predicates)."
     (bui-filter-current-entries)))
 
 
+;;; General variables
+
+(defcustom bui-titles nil
+  "Alist of titles of parameters."
+  :type '(alist :key-type symbol :value-type string)
+  :group 'bui)
+
+(defvar bui-boolean-params nil
+  "List of boolean parameters.
+These parameters are displayed using `bui-false-string' for
+nil values (unlike usual parameters which are displayed using
+`bui-empty-string').")
+
+(defvar bui-get-entries-function nil
+  "Function used to receive entries.")
+
+(defvar bui-show-entries-function nil
+  "Function used to show entries.
+This function is called with a list of entries as a single
+argument.  If nil, `bui-show-entries-default' is called with
+appropriate ENTRY-TYPE and BUFFER-TYPE.")
+
+(defvar bui-mode-initialize-function nil
+  "Function used to set up the buffer.
+This function is called without arguments after enabling the
+mode (right before running mode hooks).  If nil,
+`bui-initialize-mode-default' is called with appropriate
+ENTRY-TYPE and BUFFER-TYPE.")
+
+(defvar bui-message-function nil
+  "Function used to display a message after showing entries.
+If nil, do not display messages.")
+
+(defcustom bui-buffer-name nil
+  "Default name of a buffer for displaying entries.
+May be nil, a string or a function returning a string.  The
+function is called with the same arguments as the function used
+to get entries.  If nil, the name is defined automatically."
+  :type '(choice string function (const nil))
+  :group 'bui)
+
+(defcustom bui-filter-predicates nil
+  "List of available filter predicates.
+These predicates are used as completions for
+'\\[bui-enable-filter]' command to hide entries. See
+`bui-active-filter-predicates' for details."
+  :type '(repeat function)
+  :group 'bui)
+
+(defcustom bui-revert-confirm t
+  "If non-nil, ask to confirm for reverting the buffer."
+  :type 'boolean
+  :group 'bui)
+
+
 ;;; Overriding variables
 
-(defvar bui-variables-suffixes
-  '(true-string
-    false-string
-    empty-string
-    list-separator
-    time-format)
-  "Variables with these suffixes will be generated.
-See `bui-define-interface' for details.")
+(defconst bui-entry-symbol-specifications
+  '((:true-string           true-string t)
+    (:false-string          false-string t)
+    (:empty-string          empty-string t)
+    (:list-separator        list-separator t)
+    (:time-format           time-format t)
+    (:filter-predicates     filter-predicates t)
+    (:boolean-params        boolean-params))
+  "Specifications for generating entry variables.
+See `bui-symbol-specifications' for details.")
 
-(defun bui-set-local-variables (suffixes entry-type &optional buffer-type)
+(defconst bui-symbol-specifications
+  '((:get-entries-function  get-entries-function)
+    (:show-entries-function show-entries-function)
+    (:mode-init-function    mode-initialize-function)
+    (:message-function      message-function)
+    (:buffer-name           buffer-name t)
+    (:titles                titles always)
+    (:history-size          history-size t)
+    (:revert-confirm?       revert-confirm t))
+  "Specifications for generating interface variables.
+Each specification has the following form:
+
+  (KEYWORD SYMBOL-SUFFIX [GENERATE])
+
+KEYWORD is what can be specified in `bui-define-interface' macro.
+
+SYMBOL-SUFFIX defines the name of a generated variable (it is
+prefixed with ENTRY-TYPE-BUFFER-TYPE).
+
+If GENERATE is nil, generate the variable only if a keyword/value
+pair is specified in the macro.  If it is t, generate the
+variable, unless the defined interface is reduced.  If it is a
+symbol `always', generate the variable even for the reduced
+interface.")
+
+(defconst bui-all-symbol-specifications
+  (append bui-entry-symbol-specifications
+          bui-symbol-specifications))
+
+(defalias 'bui-symbol-specification-keyword #'cl-first
+  "Return keyword from symbol specification.")
+
+(defalias 'bui-symbol-specification-suffix #'cl-second
+  "Return symbol suffix from symbol specification.")
+
+(defalias 'bui-symbol-specification-generate #'cl-third
+  "Return 'generate' value from symbol specification.")
+
+(defun bui-symbol-generate? (generate &optional reduced?)
+  "Return non-nil if a symbol should be generated.
+See `bui-symbol-specifications' for the meaning of GENERATE.
+If REDUCED? is non-nil, it means a reduced interface should be defined."
+  (or (eq generate 'always)
+      (and generate (not reduced?))))
+
+(defun bui-map-symbol-specifications (function specifications)
+  "Map through SPECIFICATIONS using FUNCTION.
+SPECIFICATIONS should have a form of `bui-symbol-specifications'."
+  (mapcar (lambda (spec)
+            (funcall function
+                     (bui-symbol-specification-keyword spec)
+                     (bui-symbol-specification-suffix spec)
+                     (bui-symbol-specification-generate spec)))
+          specifications))
+
+(defun bui-set-local-variables (entry-type buffer-type suffixes)
   "Set BUI variables according to ENTRY-TYPE/BUFFER-TYPE variables."
   (dolist (suffix suffixes)
-    (let ((val (if buffer-type
-                   (bui-symbol-value entry-type buffer-type suffix)
-                 (bui-entry-symbol-value entry-type suffix))))
+    (let ((val (bui-symbol-value entry-type buffer-type suffix)))
       (when val
-        (let ((var (if buffer-type
-                       (bui-make-symbol 'bui buffer-type suffix)
-                     (bui-make-symbol 'bui suffix))))
+        (let* ((var (bui-make-symbol 'bui buffer-type suffix))
+               (var (if (boundp var)
+                        var
+                      (bui-make-symbol 'bui suffix))))
           (set (make-local-variable var) val))))))
-
-(defun bui-defcustom-clause (suffix entry-type &optional buffer-type)
-  "Return `defcustom' clause for `ENTRY-TYPE-BUFFER-TYPE-SUFFIX' variable."
-  (let ((var     (if buffer-type
-                     (bui-symbol entry-type buffer-type suffix)
-                   (bui-entry-symbol entry-type suffix)))
-        (bui-var (if buffer-type
-                     (bui-make-symbol 'bui buffer-type suffix)
-                   (bui-make-symbol 'bui suffix)))
-        (group   (if buffer-type
-                     (bui-symbol entry-type buffer-type)
-                   entry-type)))
-    `(defcustom ,var nil
-       ,(concat (documentation-property bui-var 'variable-documentation)
-                (format "\nIf nil, use `%S'." bui-var))
-       :type '(choice ,(get bui-var 'custom-type)
-                      (const nil))
-       :group ',group)))
 
 
 ;;; Wrappers for defined variables
@@ -282,12 +376,14 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
 
 (defun bui-enable-mode (entry-type buffer-type)
   "Turn on major mode to display ENTRY-TYPE ENTRIES in BUFFER-TYPE buffer."
-  (funcall (bui-symbol-value entry-type buffer-type 'mode-function)))
+  (funcall (bui-symbol entry-type buffer-type 'mode)))
 
 (defun bui-initialize-mode-default (entry-type buffer-type)
   "Default function to set up BUFFER-TYPE buffer for ENTRY-TYPE entries."
   (setq-local revert-buffer-function 'bui-revert)
-  (bui-set-local-variables bui-variables-suffixes entry-type)
+  (bui-set-local-variables entry-type buffer-type
+                           (mapcar #'bui-symbol-specification-suffix
+                                   bui-all-symbol-specifications))
   (funcall (bui-make-symbol 'bui buffer-type 'mode-initialize)
            entry-type))
 
@@ -492,105 +588,60 @@ This function does not update the buffer data, use
 ARGS can be the same arguments as for `bui-define-interface'.
 The difference is: arguments for `bui-define-interface' define
 specific variables for different buffer types, while this macro
-defines general variables used for any buffer type.
-
-Also if `:reduced' is nil, this macro generates
-`ENTRY-TYPE-SUFFIX' variables for each SUFFIX from
-`bui-variables-suffixes'."
+defines general variables used for any buffer type."
   (declare (indent 1))
   (bui-plist-let args
       ((reduced? :reduced?))
     `(progn
-       ,@(unless reduced?
-           (mapcar (lambda (suffix)
-                     (bui-defcustom-clause suffix entry-type))
-                   bui-variables-suffixes))
+       ,@(bui-map-symbol-specifications
+          (lambda (key suffix generate)
+            (let ((val (plist-get %foreign-args key)))
+              (when (or val (bui-symbol-generate? generate reduced?))
+                (bui-inherit-defvar-clause
+                 (bui-entry-symbol entry-type suffix)
+                 (bui-make-symbol 'bui suffix)
+                 :value val
+                 :group entry-type))))
+          bui-entry-symbol-specifications)
 
-       ,@(bui-map-plist
-          (lambda (key val)
-            `(defvar ,(bui-make-symbol entry-type
-                                       (bui-keyword->symbol key))
-               ,val))
-          %foreign-args))))
+       ,@(bui-map-symbol-specifications
+          (lambda (key suffix _generate)
+            (let ((val (plist-get %foreign-args key)))
+              (when val
+                (bui-inherit-defvar-clause
+                 (bui-entry-symbol entry-type suffix)
+                 (bui-make-symbol 'bui suffix)
+                 :value val
+                 :group entry-type))))
+          bui-symbol-specifications))))
 
 (defmacro bui-define-interface (entry-type buffer-type &rest args)
   "Define BUFFER-TYPE interface for displaying ENTRY-TYPE entries.
-Remaining arguments (ARGS) should have a form [KEYWORD VALUE] ...
-In the following description TYPE means ENTRY-TYPE-BUFFER-TYPE.
+Remaining arguments ARGS should have a form [KEYWORD VALUE] ...
+They are used to generate variables specific for the defined
+interface.  For more details and the available keywords, see
+`bui-symbol-specifications' and `bui-entry-symbol-specifications'.
 
-Required keywords:
+`:get-entries-function' is the only required keyword (if the
+interface is reduced, all keywords become optional).
 
-  - `:get-entries-function' - default value of the generated
-    `TYPE-get-entries-function' variable.
-
-Optional keywords:
-
-  - `:show-entries-function' - default value of the generated
-    `TYPE-show-entries-function' variable.
-
-  - `:buffer-name' - default value of the generated
-    `TYPE-buffer-name' variable.
-
-  - `:message-function' - default value of the generated
-    `TYPE-message-function' variable.
-
-  - `:titles' - default value of the generated
-    `TYPE-titles' variable.
-
-  - `:filter-predicates' - default value of the generated
-    `TYPE-filter-predicates' variable.
-
-  - `:history-size' - default value of the generated
-    `TYPE-history-size' variable.
-
-  - `:revert-confirm?' - default value of the generated
-    `TYPE-revert-confirm' variable.
-
-  - `:mode-name' - name (a string appeared in the mode-line) of
-     the generated `TYPE-mode'.
-
-  - `:mode-init-function' - default value of the generated
-    `TYPE-mode-initialize-function' variable.
-
-  - `:boolean-params' - default value of the generated
-    `TYPE-boolean-params' variable.
-
-  - `:reduced?' - if non-nil, generate only group, faces group
-    and titles variable (if specified); all keywords become
-    optional."
+To denote that the interface is reduced, a special `:reduced?'
+keyword may be specified.  If it is non-nil, generate only
+customization group, faces group and specified variables.  If it
+is nil, along with the mentioned groups and variables,
+`ENTRY-TYPE-BUFFER-TYPE-mode' will be generated."
   (declare (indent 2))
   (let* ((entry-type-str     (symbol-name entry-type))
          (buffer-type-str    (symbol-name buffer-type))
          (prefix             (concat entry-type-str "-" buffer-type-str))
          (group              (intern prefix))
          (faces-group        (intern (concat prefix "-faces")))
-         (get-entries-var    (intern (concat prefix "-get-entries-function")))
-         (show-entries-var   (intern (concat prefix "-show-entries-function")))
          (mode-str           (concat prefix "-mode"))
          (mode-map-str       (concat mode-str "-map"))
          (mode               (intern mode-str))
-         (parent-mode        (intern (concat "bui-" buffer-type-str "-mode")))
-         (mode-var           (intern (concat mode-str "-function")))
-         (mode-init-var      (intern (concat mode-str "-initialize-function")))
-         (message-var        (intern (concat prefix "-message-function")))
-         (buffer-name-var    (intern (concat prefix "-buffer-name")))
-         (filter-preds-var   (intern (concat prefix "-filter-predicates")))
-         (boolean-params-var (intern (concat prefix "-boolean-params")))
-         (titles-var         (intern (concat prefix "-titles")))
-         (history-size-var   (intern (concat prefix "-history-size")))
-         (revert-confirm-var (intern (concat prefix "-revert-confirm"))))
+         (parent-mode        (intern (concat "bui-" buffer-type-str "-mode"))))
     (bui-plist-let args
-        ((get-entries-val    :get-entries-function)
-         (show-entries-val   :show-entries-function)
-         (mode-name          :mode-name (capitalize prefix))
-         (mode-init-val      :mode-init-function)
-         (message-val        :message-function)
-         (buffer-name-val    :buffer-name)
-         (filter-preds-val   :filter-predicates)
-         (boolean-params-val :boolean-params)
-         (titles-val         :titles)
-         (history-size-val   :history-size 20)
-         (revert-confirm-val :revert-confirm? t)
+        ((mode-name          :mode-name (capitalize prefix))
          (reduced?           :reduced?))
       `(progn
          (defgroup ,group nil
@@ -606,97 +657,38 @@ Optional keywords:
            :group ',(intern (concat entry-type-str "-faces"))
            :group ',(intern (concat "bui-" buffer-type-str "-faces")))
 
-         (defcustom ,titles-var ,titles-val
-           ,(format "\
-Alist of titles of '%s' parameters for '%s' buffer."
-                    entry-type-str buffer-type-str)
-           :type '(alist :key-type symbol :value-type string)
-           :group ',group)
+         ,@(bui-map-symbol-specifications
+            (lambda (key suffix generate)
+              (let ((val (plist-get %foreign-args key)))
+                (when (or val (bui-symbol-generate? generate reduced?))
+                  (bui-inherit-defvar-clause
+                   (bui-symbol entry-type buffer-type suffix)
+                   (bui-make-symbol 'bui suffix)
+                   :value val
+                   :group group))))
+            bui-symbol-specifications)
 
-         (defvar ,boolean-params-var ,boolean-params-val
-           ,(format "\
-List of boolean '%s' parameters for '%s' buffer.
-These parameters are displayed using `bui-false-string' for
-nil values (unlike usual parameters which are displayed using
-`bui-empty-string')."
-                    entry-type-str buffer-type-str))
+         ,@(bui-map-symbol-specifications
+            (lambda (key suffix _generate)
+              (let ((val (plist-get %foreign-args key)))
+                (when val
+                  (bui-inherit-defvar-clause
+                   (bui-symbol entry-type buffer-type suffix)
+                   (bui-make-symbol 'bui suffix)
+                   :value val
+                   :group group))))
+            bui-entry-symbol-specifications)
 
          ,(unless reduced?
-            `(progn
-               (defvar ,get-entries-var ,get-entries-val
-                 ,(format "\
-Function used to receive '%s' entries for '%s' buffer."
-                          entry-type-str buffer-type-str))
-
-               (defvar ,show-entries-var ,show-entries-val
-                 ,(format "\
-Function used to show '%s' entries in '%s' buffer."
-                          entry-type-str buffer-type-str))
-
-               (defvar ,message-var ,message-val
-                 ,(format "\
-Function used to display a message after showing '%s' entries.
-If nil, do not display messages."
-                          entry-type-str))
-
-               (defcustom ,buffer-name-var ,buffer-name-val
-                 ,(format "\
-Default name of '%s' buffer for displaying '%s' entries.
-May be nil, a string or a function returning a string.  The
-function is called with the same arguments as `%S'.  If nil, the
-name is defined automatically."
-                          buffer-type-str entry-type-str get-entries-var)
-                 :type '(choice string function)
-                 :group ',group)
-
-               (defcustom ,filter-preds-var ,filter-preds-val
-                 ,(format "\
-List of available filter predicates for '%s' entries.
-These predicates are used as completions for
-'\\[bui-enable-filter]' command to hide entries from '%s'
-buffer. See `bui-active-filter-predicates' for details."
-                          entry-type-str buffer-type-str)
-                 :type '(repeat function)
-                 :group ',group)
-
-               (defcustom ,history-size-var ,history-size-val
-                 ,(format "\
-Maximum number of items saved in history of `%S' buffer.
-If 0, the history is disabled."
-                          buffer-name-var)
-                 :type 'integer
-                 :group ',group)
-
-               (defcustom ,revert-confirm-var ,revert-confirm-val
-                 ,(format "\
-If non-nil, ask to confirm for reverting `%S' buffer."
-                          buffer-name-var)
-                 :type 'boolean
-                 :group ',group)
-
-               (defvar ,mode-var ',mode
-                  ,(format "\
-Major mode for displaying '%s' entries in '%s' buffer."
-                           entry-type-str buffer-type-str))
-
-               (defvar ,mode-init-var ,mode-init-val
-                 ,(format "\
-Function used to set up '%s' buffer for displaying '%s' entries."
-                          buffer-type-str entry-type-str))
-
-               (define-derived-mode ,mode ,parent-mode
-                 '(,mode-name (bui-active-filter-predicates
-                               bui-filter-mode-line-string))
-                 ,(format "\
+            `(define-derived-mode ,mode ,parent-mode
+               '(,mode-name (bui-active-filter-predicates
+                             bui-filter-mode-line-string))
+               ,(format "\
 Major mode for displaying '%s' entries in '%s' buffer.
 
 \\{%s}"
-                          entry-type-str buffer-type-str mode-map-str)
-                 (setq-local bui-history-size
-                             (bui-history-size ',entry-type
-                                               ',buffer-type))
-                 (bui-initialize-mode ',entry-type
-                                      ',buffer-type))))))))
+                        entry-type-str buffer-type-str mode-map-str)
+               (bui-initialize-mode ',entry-type ',buffer-type)))))))
 
 
 (defvar bui-font-lock-keywords
