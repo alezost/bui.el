@@ -631,64 +631,65 @@ customization group, faces group and specified variables.  If it
 is nil, along with the mentioned groups and variables,
 `ENTRY-TYPE-BUFFER-TYPE-mode' will be generated."
   (declare (indent 2))
-  (let* ((entry-type-str     (symbol-name entry-type))
-         (buffer-type-str    (symbol-name buffer-type))
-         (prefix             (concat entry-type-str "-" buffer-type-str))
-         (group              (intern prefix))
-         (faces-group        (intern (concat prefix "-faces")))
-         (mode-str           (concat prefix "-mode"))
-         (mode-map-str       (concat mode-str "-map"))
-         (mode               (intern mode-str))
-         (parent-mode        (intern (concat "bui-" buffer-type-str "-mode"))))
-    (bui-plist-let args
-        ((mode-name          :mode-name (capitalize prefix))
-         (reduced?           :reduced?))
-      `(progn
-         (defgroup ,group nil
-           ,(format "Displaying '%s' entries in '%s' buffer."
-                    entry-type-str buffer-type-str)
-           :group ',(intern entry-type-str)
-           :group ',(intern (concat "bui-" buffer-type-str)))
+  (cl-flet ((name (&rest symbols)
+              (apply #'bui-symbol entry-type buffer-type symbols))
+            (bui-name (&rest symbols)
+              (apply #'bui-make-symbol 'bui symbols)))
+    (let ((group              (name))
+          (faces-group        (name 'faces))
+          (mode               (name 'mode))
+          (mode-map           (name 'mode-map))
+          (bui-buffer-type    (bui-name buffer-type))
+          (parent-mode        (bui-name buffer-type 'mode)))
+      (bui-plist-let args
+          ((mode-name         :mode-name (capitalize (symbol-name group)))
+           (reduced?          :reduced?))
+        `(progn
+           (defgroup ,group nil
+             ,(format "Displaying '%S' entries in '%S' buffer."
+                      entry-type buffer-type)
+             :group ',entry-type
+             :group ',bui-buffer-type)
 
-         (defgroup ,faces-group nil
-           ,(format "Faces for displaying '%s' entries in '%s' buffer."
-                    entry-type-str buffer-type-str)
-           :group ',group
-           :group ',(intern (concat entry-type-str "-faces"))
-           :group ',(intern (concat "bui-" buffer-type-str "-faces")))
+           (defgroup ,faces-group nil
+             ,(format "Faces for displaying '%S' entries in '%S' buffer."
+                      entry-type buffer-type)
+             :group ',group
+             :group ',(bui-name entry-type 'faces)
+             :group ',(bui-name buffer-type 'faces))
 
-         ,@(bui-map-symbol-specifications
-            (lambda (key suffix generate)
-              (let ((val (plist-get %foreign-args key)))
-                (when (or val (bui-symbol-generate? generate reduced?))
-                  (bui-inherit-defvar-clause
-                   (bui-symbol entry-type buffer-type suffix)
-                   (bui-make-symbol 'bui suffix)
-                   :value val
-                   :group group))))
-            bui-symbol-specifications)
+           ,@(bui-map-symbol-specifications
+              (lambda (key suffix generate)
+                (let ((val (plist-get %foreign-args key)))
+                  (when (or val (bui-symbol-generate? generate reduced?))
+                    (bui-inherit-defvar-clause
+                     (name suffix)
+                     (bui-name suffix)
+                     :value val
+                     :group group))))
+              bui-symbol-specifications)
 
-         ,@(bui-map-symbol-specifications
-            (lambda (key suffix _generate)
-              (let ((val (plist-get %foreign-args key)))
-                (when val
-                  (bui-inherit-defvar-clause
-                   (bui-symbol entry-type buffer-type suffix)
-                   (bui-make-symbol 'bui suffix)
-                   :value val
-                   :group group))))
-            bui-entry-symbol-specifications)
+           ,@(bui-map-symbol-specifications
+              (lambda (key suffix _generate)
+                (let ((val (plist-get %foreign-args key)))
+                  (when val
+                    (bui-inherit-defvar-clause
+                     (name suffix)
+                     (bui-name suffix)
+                     :value val
+                     :group group))))
+              bui-entry-symbol-specifications)
 
-         ,(unless reduced?
-            `(define-derived-mode ,mode ,parent-mode
-               '(,mode-name (bui-active-filter-predicates
-                             bui-filter-mode-line-string))
-               ,(format "\
-Major mode for displaying '%s' entries in '%s' buffer.
+           ,(unless reduced?
+              `(define-derived-mode ,mode ,parent-mode
+                 '(,mode-name (bui-active-filter-predicates
+                               bui-filter-mode-line-string))
+                 ,(format "\
+Major mode for displaying '%S' entries in '%S' buffer.
 
-\\{%s}"
-                        entry-type-str buffer-type-str mode-map-str)
-               (bui-initialize-mode ',entry-type ',buffer-type)))))))
+\\{%S}"
+                          entry-type buffer-type mode-map)
+                 (bui-initialize-mode ',entry-type ',buffer-type))))))))
 
 
 (defvar bui-font-lock-keywords
