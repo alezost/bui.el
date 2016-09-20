@@ -433,7 +433,7 @@ See `insert-text-button' for the meaning of PROPERTIES."
          properties))
 
 
-;;; Major mode and interface definer
+;;; Major mode
 
 (defvar bui-info-mode-map
   (let ((map (make-sparse-keymap)))
@@ -457,45 +457,6 @@ See `insert-text-button' for the meaning of PROPERTIES."
   ;; highlights the rest text after it as a string.
   ;; See (info "(elisp) Font Lock Basics") for details.
   (setq font-lock-defaults '(nil t)))
-
-(defmacro bui-define-info-interface (entry-type &rest args)
-  "Define 'info' interface for displaying ENTRY-TYPE entries.
-Remaining arguments (ARGS) should have a form [KEYWORD VALUE] ...
-They are used to generate variables specific for the defined info
-interface.  For more details and the available keywords, see
-`bui-info-symbol-specifications'.
-
-The rest keyword arguments are passed to
-`bui-define-interface' macro."
-  (declare (indent 1))
-  (let* ((entry-type-str     (symbol-name entry-type))
-         (prefix             (concat entry-type-str "-info"))
-         (group              (intern prefix)))
-    (bui-plist-let args
-        ((reduced?           :reduced?))
-      `(progn
-         ,@(bui-map-symbol-specifications
-            (lambda (key suffix generate)
-              (let ((val (plist-get args key)))
-                (when (or val (bui-symbol-generate? generate reduced?))
-                  (bui-inherit-defvar-clause
-                   (bui-info-symbol entry-type suffix)
-                   (bui-make-symbol 'bui-info suffix)
-                   :value val
-                   :group group))))
-            bui-info-symbol-specifications)
-
-         (bui-define-interface ,entry-type info
-           ,@args)))))
-
-
-(defvar bui-info-font-lock-keywords
-  (eval-when-compile
-    `((,(rx "(" (group "bui-define-info-interface")
-            symbol-end)
-       . 1))))
-
-(font-lock-add-keywords 'emacs-lisp-mode bui-info-font-lock-keywords)
 
 (provide 'bui-info)
 

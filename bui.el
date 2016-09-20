@@ -620,7 +620,8 @@ defines general variables used for any buffer type."
 Remaining arguments ARGS should have a form [KEYWORD VALUE] ...
 They are used to generate variables specific for the defined
 interface.  For more details and the available keywords, see
-`bui-symbol-specifications' and `bui-entry-symbol-specifications'.
+`bui-symbol-specifications', `bui-entry-symbol-specifications'
+and `bui-BUFFER-TYPE-symbol-specifications'.
 
 `:get-entries-function' is the only required keyword (if the
 interface is reduced, all keywords become optional).
@@ -640,11 +641,15 @@ is nil, along with the mentioned groups and variables,
           (mode               (name 'mode))
           (mode-map           (name 'mode-map))
           (bui-buffer-type    (bui-name buffer-type))
+          (symbol-fun         (bui-name buffer-type 'symbol))
+          (symbol-specs       (bui-name buffer-type 'symbol-specifications))
           (parent-mode        (bui-name buffer-type 'mode)))
       (bui-plist-let args
           ((mode-name         :mode-name (capitalize (symbol-name group)))
            (reduced?          :reduced?))
         `(progn
+           (require ',bui-buffer-type)
+
            (defgroup ,group nil
              ,(format "Displaying '%S' entries in '%S' buffer."
                       entry-type buffer-type)
@@ -679,6 +684,17 @@ is nil, along with the mentioned groups and variables,
                      :value val
                      :group group))))
               bui-entry-symbol-specifications)
+
+           ,@(bui-map-symbol-specifications
+              (lambda (key suffix generate)
+                (let ((val (plist-get args key)))
+                  (when (or val (bui-symbol-generate? generate reduced?))
+                    (bui-inherit-defvar-clause
+                     (funcall symbol-fun entry-type suffix)
+                     (bui-name buffer-type suffix)
+                     :value val
+                     :group group))))
+              (symbol-value symbol-specs))
 
            ,(unless reduced?
               `(define-derived-mode ,mode ,parent-mode

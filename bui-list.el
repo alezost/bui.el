@@ -469,7 +469,7 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
   (bui-list-restore-marks))
 
 
-;;; Major mode and interface definer
+;;; Major mode
 
 (defvar bui-list-mode-map
   (let ((map (make-sparse-keymap)))
@@ -502,45 +502,6 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
                                    bui-list-symbol-specifications))
   (setq-local bui-list-marks (bui-list-marks entry-type))
   (tabulated-list-init-header))
-
-(defmacro bui-define-list-interface (entry-type &rest args)
-  "Define 'list' interface for displaying ENTRY-TYPE entries.
-Remaining arguments (ARGS) should have a form [KEYWORD VALUE] ...
-They are used to generate variables specific for the defined info
-interface.  For more details and the available keywords, see
-`bui-info-symbol-specifications'.
-
-The rest keyword arguments are passed to
-`bui-define-interface' macro."
-  (declare (indent 1))
-  (let* ((entry-type-str     (symbol-name entry-type))
-         (prefix             (concat entry-type-str "-list"))
-         (group              (intern prefix)))
-    (bui-plist-let args
-        ((reduced?           :reduced?))
-      `(progn
-         ,@(bui-map-symbol-specifications
-            (lambda (key suffix generate)
-              (let ((val (plist-get %foreign-args key)))
-                (when (or val (bui-symbol-generate? generate reduced?))
-                  (bui-inherit-defvar-clause
-                   (bui-list-symbol entry-type suffix)
-                   (bui-make-symbol 'bui-list suffix)
-                   :value val
-                   :group group))))
-            bui-list-symbol-specifications)
-
-         (bui-define-interface ,entry-type list
-           ,@args)))))
-
-
-(defvar bui-list-font-lock-keywords
-  (eval-when-compile
-    `((,(rx "(" (group "bui-define-list-interface")
-            symbol-end)
-       . 1))))
-
-(font-lock-add-keywords 'emacs-lisp-mode bui-list-font-lock-keywords)
 
 (provide 'bui-list)
 

@@ -68,7 +68,7 @@
 
 ;;; 'Info' interface
 
-(bui-define-info-interface buffers
+(bui-define-interface buffers info
   :format '((name format buffers-info-insert-name)
             (mode format (simple buffers-mode-function))
             (size format (format))
@@ -102,7 +102,7 @@
 
 ;;; 'List' interface
 
-(bui-define-list-interface buffers
+(bui-define-interface buffers list
   :buffer-name "*Buffers*"
   :describe-function #'buffers-list-describe
   :titles '((mod-time . "Mod. Time"))
