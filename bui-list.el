@@ -155,10 +155,6 @@ With prefix argument, describe entries marked with any mark."
   "Return sort key for ENTRY-TYPE."
   (bui-list-symbol-value entry-type 'sort-key))
 
-(defun bui-list-additional-marks (entry-type)
-  "Return alist of additional marks for ENTRY-TYPE."
-  (bui-list-symbol-value entry-type 'additional-marks))
-
 (defun bui-list-show-single-entry? (entry-type)
   "Return non-nil, if a single entry of ENTRY-TYPE should be listed."
   (bui-list-symbol-value entry-type 'show-single))
@@ -358,11 +354,6 @@ ARGS is a list of additional values.")
     (general . ?*))
   "Alist of default mark names and mark characters.")
 
-(defun bui-list-marks (entry-type)
-  "Return alist of available marks for ENTRY-TYPE."
-  (append bui-list-default-marks
-          (bui-list-additional-marks entry-type)))
-
 (defun bui-list-get-mark (name)
   "Return mark character by its NAME."
   (or (bui-assq-value bui-list-marks name)
@@ -500,7 +491,8 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
   (bui-set-local-variables entry-type 'list
                            (mapcar #'bui-symbol-specification-suffix
                                    bui-list-symbol-specifications))
-  (setq-local bui-list-marks (bui-list-marks entry-type))
+  (setq-local bui-list-marks (append bui-list-default-marks
+                                     bui-list-additional-marks))
   (tabulated-list-init-header))
 
 (provide 'bui-list)
