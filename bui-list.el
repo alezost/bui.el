@@ -113,12 +113,16 @@ See `bui-symbol-specifications' for details.")
 
 ;;; Displaying 'info' buffer
 
-(defun bui-list-describe (&optional mark-names)
-  "Describe entries marked with a general mark.
+(defun bui-list-describe (&rest mark-names)
+  "Describe entries marked with MARK-NAMES.
 'Describe' means display entries in 'info' buffer.
 If no entries are marked, describe the current entry.
-With prefix argument, describe entries marked with any mark."
-  (interactive (list (unless current-prefix-arg '(general))))
+
+Available MARK-NAMES are symbols from `bui-list-marks'.
+
+Interactively, describe entries marked with a general mark.  With
+prefix argument, describe entries marked with any mark."
+  (interactive (unless current-prefix-arg '(general)))
   (let* ((ids        (or (apply #'bui-list-get-marked-id-list mark-names)
                          (list (bui-list-current-id))))
          (count      (length ids))
