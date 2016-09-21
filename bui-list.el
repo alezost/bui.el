@@ -161,8 +161,11 @@ With prefix argument, describe entries marked with any mark."
 
 (defun bui-list-describe-entries (entry-type ids)
   "Describe ENTRY-TYPE entries with IDS in 'info' buffer."
-  (apply (bui-list-symbol-value entry-type 'describe-function)
-         ids))
+  (--if-let (bui-list-symbol-value entry-type 'describe-function)
+      (apply it ids)
+    (error "Can't describe %s: '%S' is unset or undefined"
+           (if (null (cdr ids)) "this entry" "these entries")
+           (bui-list-symbol entry-type 'describe-function))))
 
 
 ;;; Tabulated list internals
