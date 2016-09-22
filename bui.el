@@ -583,6 +583,22 @@ This function does not update the buffer data, use
 
 ;;; Interface definers
 
+(defvar bui-interfaces nil
+  "List of defined interfaces.")
+
+(defalias 'bui-interface-id #'bui-make-symbol
+  "Return some kind of identifier for ENTRY-TYPE/BUFFER-TYPE interface.")
+
+(defun bui-interface-defined? (entry-type buffer-type)
+  "Return non-nil if ENTRY-TYPE/BUFFER-TYPE interface is defined."
+  (member (bui-interface-id entry-type buffer-type)
+          bui-interfaces))
+
+(defun bui-register-interface (entry-type buffer-type)
+  "Add new ENTRY-TYPE/BUFFER-TYPE interface to `bui-interfaces'."
+  (cl-pushnew (bui-interface-id entry-type buffer-type)
+              bui-interfaces))
+
 (defmacro bui-define-entry-type (entry-type &rest args)
   "Define variables for ENTRY-TYPE.
 ARGS can be the same arguments as for `bui-define-interface'.
@@ -705,7 +721,9 @@ Major mode for displaying '%S' entries in '%S' buffer.
 
 \\{%S}"
                           entry-type buffer-type mode-map)
-                 (bui-initialize-mode ',entry-type ',buffer-type))))))))
+                 (bui-initialize-mode ',entry-type ',buffer-type)))
+
+           (bui-register-interface ',entry-type ',buffer-type))))))
 
 
 (defvar bui-font-lock-keywords
