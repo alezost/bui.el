@@ -262,7 +262,7 @@ Parameters are taken from ENTRY-TYPE ENTRY."
     (if (or (null entries)      ; = 0
             (cdr entries)       ; > 1
             (bui-list-show-single-entry? entry-type)
-            (null (bui-symbol-value entry-type 'info 'show-entries-function)))
+            (not (bui-interface-defined? entry-type 'info)))
         (bui-display-entries entries entry-type 'list args)
       (if (equal (bui-symbol-value entry-type 'info 'get-entries-function)
                  (bui-symbol-value entry-type 'list 'get-entries-function))
