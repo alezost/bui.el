@@ -23,10 +23,10 @@
 
 ;;; Code:
 
-(require 'cus-edit)             ; for button faces
 (require 'dash)
 (require 'bui)
 (require 'bui-entry)
+(require 'bui-button)
 (require 'bui-utils)
 
 (bui-define-groups bui-info)
@@ -42,29 +42,9 @@
   "Face used for titles of parameters."
   :group 'bui-info-faces)
 
-(defface bui-info-file-name
-  '((t :inherit link))
-  "Face used for file names."
-  :group 'bui-info-faces)
-
-(defface bui-info-url
-  '((t :inherit link))
-  "Face used for URLs."
-  :group 'bui-info-faces)
-
 (defface bui-info-time
   '((t :inherit font-lock-constant-face))
   "Face used for timestamps."
-  :group 'bui-info-faces)
-
-(defface bui-info-action-button
-  '((t :inherit custom-button))
-  "Face used for action buttons."
-  :group 'bui-info-faces)
-
-(defface bui-info-action-button-mouse
-  '((t :inherit custom-button-mouse))
-  "Mouse face used for action buttons."
   :group 'bui-info-faces)
 
 
@@ -378,59 +358,6 @@ BUTTON-OR-FACE is a button type)."
 See `bui-get-time-string' for the meaning of TIME."
   (bui-format-insert (bui-get-time-string time)
                      (or face 'bui-info-time)))
-
-
-;;; Buttons
-
-(defvar bui-info-button-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map button-map)
-    (define-key map (kbd "c") 'bui-info-button-copy-label)
-    map)
-  "Keymap for buttons in info buffers.")
-
-(define-button-type 'bui
-  'keymap bui-info-button-map
-  'follow-link t)
-
-(define-button-type 'bui-action
-  :supertype 'bui
-  'face 'bui-info-action-button
-  'mouse-face 'bui-info-action-button-mouse)
-
-(define-button-type 'bui-file
-  :supertype 'bui
-  'face 'bui-info-file-name
-  'help-echo "Find file"
-  'action (lambda (btn)
-            (bui-find-file (button-label btn))))
-
-(define-button-type 'bui-url
-  :supertype 'bui
-  'face 'bui-info-url
-  'help-echo "Browse URL"
-  'action (lambda (btn)
-            (browse-url (button-label btn))))
-
-(defun bui-info-button-copy-label (&optional pos)
-  "Copy a label of the button at POS into kill ring.
-If POS is nil, use the current point position."
-  (interactive)
-  (--when-let (button-at (or pos (point)))
-    (bui-copy-as-kill (button-label it))))
-
-(defun bui-info-insert-action-button (label action &optional message
-                                      &rest properties)
-  "Make action button with LABEL and insert it at point.
-ACTION is a function called when the button is pressed.  It
-should accept button as the argument.
-MESSAGE is a button message.
-See `insert-text-button' for the meaning of PROPERTIES."
-  (apply #'bui-insert-button
-         label 'bui-action
-         'action action
-         'help-echo message
-         properties))
 
 
 ;;; Major mode

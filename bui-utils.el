@@ -210,43 +210,6 @@ Separate inserted lines with SEPARATOR."
                      (or separator "")))))
 
 
-;;; Buttons
-
-(defun bui-button-type? (symbol)
-  "Return non-nil, if SYMBOL is a button type."
-  (and symbol
-       (get symbol 'button-category-symbol)))
-
-(defun bui-insert-button (label &optional type &rest properties)
-  "Make button of TYPE with LABEL and insert it at point.
-See `insert-text-button' for the meaning of PROPERTIES."
-  (apply #'insert-text-button label
-         :type (or type 'button)
-         properties))
-
-(defun bui-buttonize (value button-type separator &rest properties)
-  "Make BUTTON-TYPE button(s) from VALUE.
-Return a string with button(s).
-
-VALUE can be nil, a button name (string or symbol) or a list of
-button names.  If it is a list, buttons are separated with
-SEPARATOR string.
-
-PROPERTIES are passed to `bui-insert-button'."
-  (bui-get-non-nil value
-    (with-temp-buffer
-      (let ((labels (if (listp value) value (list value))))
-        (bui-mapinsert (lambda (label)
-                         (apply #'bui-insert-button
-                                (if (symbolp label)
-                                    (symbol-name label)
-                                  label)
-                                button-type properties))
-                       labels
-                       separator))
-      (buffer-substring (point-min) (point-max)))))
-
-
 ;;; Files and URLs
 
 (defcustom bui-find-file-function #'find-file
