@@ -28,22 +28,22 @@
 (defface bui-file-name
   '((t :inherit link))
   "Face used for file name buttons."
-  :group 'bui-info-faces)
+  :group 'bui-faces)
 
 (defface bui-url
   '((t :inherit link))
   "Face used for URL buttons."
-  :group 'bui-info-faces)
+  :group 'bui-faces)
 
 (defface bui-action-button
   '((t :inherit custom-button))
   "Face used for action buttons."
-  :group 'bui-info-faces)
+  :group 'bui-faces)
 
 (defface bui-action-button-mouse
   '((t :inherit custom-button-mouse))
   "Mouse face used for action buttons."
-  :group 'bui-info-faces)
+  :group 'bui-faces)
 
 (defvar bui-button-map
   (let ((map (make-sparse-keymap)))
