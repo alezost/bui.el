@@ -40,7 +40,7 @@ Each element of the list has a form of `bui-history-stack-item'.")
 Each element of the list has a form of `bui-history-stack-item'.")
 (put 'bui-history-forward-stack 'permanent-local t)
 
-(defvar bui-history-size 0
+(defvar bui-history-size 16
   "Maximum number of items saved in history.
 If 0, the history is disabled.
 If nil, the history is infinite (until Emacs eats all your memory :-)).")
