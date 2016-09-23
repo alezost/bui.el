@@ -1,6 +1,6 @@
 ;;; bui-history.el --- Buffer history  -*- lexical-binding: t -*-
 
-;; Copyright © 2014 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014, 2016 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@ Each element of the list has a form of `bui-history-stack-item'.")
 
 (defvar bui-history-size 0
   "Maximum number of items saved in history.
-If 0, the history is disabled.")
+If 0, the history is disabled.
+If nil, the history is infinite (until Emacs eats all your memory :-)).")
 
 (defun bui-history-add (item)
   "Add ITEM to history."
@@ -50,8 +51,9 @@ If 0, the history is disabled.")
        (push bui-history-stack-item bui-history-back-stack))
   (setq bui-history-forward-stack nil
         bui-history-stack-item item)
-  (when (>= (length bui-history-back-stack)
-            bui-history-size)
+  (when (and bui-history-size
+             (>= (length bui-history-back-stack)
+                 bui-history-size))
     (setq bui-history-back-stack
           (cl-loop for elt in bui-history-back-stack
                    for i from 1 to bui-history-size
