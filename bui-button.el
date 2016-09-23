@@ -25,57 +25,57 @@
 (require 'dash)
 (require 'bui-utils)
 
-(defface bui-info-file-name
+(defface bui-file-name
   '((t :inherit link))
   "Face used for file name buttons."
   :group 'bui-info-faces)
 
-(defface bui-info-url
+(defface bui-url
   '((t :inherit link))
   "Face used for URL buttons."
   :group 'bui-info-faces)
 
-(defface bui-info-action-button
+(defface bui-action-button
   '((t :inherit custom-button))
   "Face used for action buttons."
   :group 'bui-info-faces)
 
-(defface bui-info-action-button-mouse
+(defface bui-action-button-mouse
   '((t :inherit custom-button-mouse))
   "Mouse face used for action buttons."
   :group 'bui-info-faces)
 
-(defvar bui-info-button-map
+(defvar bui-button-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map button-map)
-    (define-key map (kbd "c") 'bui-info-button-copy-label)
+    (define-key map (kbd "c") 'bui-button-copy-label)
     map)
   "Keymap for BUI buttons.")
 
 (define-button-type 'bui
-  'keymap bui-info-button-map
+  'keymap bui-button-map
   'follow-link t)
 
 (define-button-type 'bui-action
   :supertype 'bui
-  'face 'bui-info-action-button
-  'mouse-face 'bui-info-action-button-mouse)
+  'face 'bui-action-button
+  'mouse-face 'bui-action-button-mouse)
 
 (define-button-type 'bui-file
   :supertype 'bui
-  'face 'bui-info-file-name
+  'face 'bui-file-name
   'help-echo "Find file"
   'action (lambda (btn)
             (bui-find-file (button-label btn))))
 
 (define-button-type 'bui-url
   :supertype 'bui
-  'face 'bui-info-url
+  'face 'bui-url
   'help-echo "Browse URL"
   'action (lambda (btn)
             (browse-url (button-label btn))))
 
-(defun bui-info-button-copy-label (&optional position)
+(defun bui-button-copy-label (&optional position)
   "Copy a label of the button at POSITION into kill ring.
 If POSITION is nil, use the current point position."
   (interactive)
@@ -94,8 +94,8 @@ See `insert-text-button' for the meaning of PROPERTIES."
          :type (or type 'button)
          properties))
 
-(defun bui-info-insert-action-button (label action &optional message
-                                      &rest properties)
+(defun bui-insert-action-button (label action &optional message
+                                       &rest properties)
   "Make action button with LABEL and insert it at point.
 ACTION is a function called when the button is pressed.  It
 should accept button as the argument.

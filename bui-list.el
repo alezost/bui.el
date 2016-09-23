@@ -26,19 +26,20 @@
 (require 'dash)
 (require 'tabulated-list)
 (require 'bui)
-(require 'bui-info)
+(require 'bui-info)             ; for faces
+(require 'bui-button)           ; for faces
 (require 'bui-entry)
 (require 'bui-utils)
 
 (bui-define-groups bui-list)
 
 (defface bui-list-file-name
-  '((t :inherit bui-info-file-name))
+  '((t :inherit bui-file-name))
   "Face used for file names."
   :group 'bui-list-faces)
 
 (defface bui-list-url
-  '((t :inherit bui-info-url))
+  '((t :inherit bui-url))
   "Face used for URLs."
   :group 'bui-list-faces)
 
