@@ -23,6 +23,11 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'bui-utils)
+
+(bui-define-groups bui-history
+  :group-doc "Settings for BUI buffers history."
+  :faces-group-doc "Faces for history buttons.")
 
 (defvar-local bui-history-stack-item nil
   "Current item of the history.
@@ -40,10 +45,12 @@ Each element of the list has a form of `bui-history-stack-item'.")
 Each element of the list has a form of `bui-history-stack-item'.")
 (put 'bui-history-forward-stack 'permanent-local t)
 
-(defvar bui-history-size 16
+(defcustom bui-history-size 16
   "Maximum number of items saved in history.
 If 0, the history is disabled.
-If nil, the history is infinite (until Emacs eats all your memory :-)).")
+If nil, the history is infinite (until Emacs eats all your memory :-))."
+  :type '(choice integer (const :tag "Infinite" nil))
+  :group 'bui-history)
 
 (defun bui-history-add (item)
   "Add ITEM to history."
