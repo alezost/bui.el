@@ -489,15 +489,15 @@ HISTORY should be one of the following:
   `replace' - replace the current history item."
   (bui-with-item buffer-item
     (when %entries
-      ;; Set buffer item before showing entries, so that its value can
-      ;; be used by the code for displaying entries.
+      ;; Set buffer item and history before showing entries, so that
+      ;; they can be used by the code for displaying entries.
       (setq bui-item buffer-item)
-      (bui-show-entries %entries %entry-type %buffer-type)
       (unless (eq history 'no)
         (funcall (cl-ecase history
                    ((nil add) #'bui-history-add)
                    (replace   #'bui-history-replace))
-                 (bui-history-item buffer-item))))
+                 (bui-history-item buffer-item)))
+      (bui-show-entries %entries %entry-type %buffer-type))
     (bui-message %entries %entry-type %buffer-type %args)))
 
 (defun bui-display-entries-current (entries entry-type buffer-type args

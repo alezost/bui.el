@@ -230,7 +230,8 @@ LEVEL is 1 by default."
   (bui-mapinsert (lambda (entry)
                    (bui-info-insert-entry entry entry-type))
                  entries
-                 bui-info-delimiter))
+                 bui-info-delimiter)
+  (bui-history-insert-buttons))
 
 (defun bui-info-insert-entry (entry entry-type &optional indent-level)
   "Insert ENTRY-TYPE ENTRY into the current info buffer.

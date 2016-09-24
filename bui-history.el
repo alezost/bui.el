@@ -23,6 +23,8 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'help-mode)            ; for button labels
+(require 'bui-button)
 (require 'bui-utils)
 
 (bui-define-groups bui-history
@@ -93,6 +95,58 @@ ITEM should have the form of `bui-history-stack-item'."
       (user-error "No next element in history"))
   (push bui-history-stack-item bui-history-back-stack)
   (bui-history-goto (pop bui-history-forward-stack)))
+
+
+;;; History buttons
+
+(defface bui-history-button
+  '((t :inherit button))
+  "Face used for history buttons (back/forward)."
+  :group 'bui-history-faces)
+
+(defcustom bui-history-back-label help-back-label
+  "Label of a button used to move backward by history."
+  :type 'string
+  :group 'bui-history)
+
+(defcustom bui-history-forward-label help-forward-label
+  "Label of a button used to move forward by history."
+  :type 'string
+  :group 'bui-history)
+
+(define-button-type 'bui-history
+  :supertype 'bui
+  'face 'bui-history-button)
+
+(defun bui-history-insert-button (label action &optional message
+                                        &rest properties)
+  "Insert history button with LABEL at point.
+ACTION is a function called without arguments when the button is
+pressed.  MESSAGE is a button help message.  See
+`insert-text-button' for the meaning of PROPERTIES."
+  (apply #'bui-insert-button
+         label 'bui-history
+         'action (lambda (_btn) (funcall action))
+         'help-echo message
+         properties))
+
+(defun bui-history-insert-buttons ()
+  "Insert back/forward history buttons at point if needed."
+  (let ((insert-back?    bui-history-back-stack)
+        (insert-forward? bui-history-forward-stack)
+        (insert-any?     (or bui-history-back-stack
+                             bui-history-forward-stack)))
+    (when insert-any? (bui-newline))
+    (when insert-back?
+      (bui-history-insert-button bui-history-back-label
+                                 #'bui-history-back
+                                 "Go back to the previous info"))
+    (when insert-forward?
+      (when insert-back? (insert "\t"))
+      (bui-history-insert-button bui-history-forward-label
+                                 #'bui-history-forward
+                                 "Go forward to the next info"))
+    (when insert-any? (bui-newline))))
 
 (provide 'bui-history)
 
