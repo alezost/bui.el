@@ -190,14 +190,19 @@ available predicates.
 If SINGLE? is non-nil (with prefix argument), make PREDICATE the
 only active one (remove the other active predicates)."
   (interactive
-   (list (intern (completing-read
-                  (if current-prefix-arg
-                      "Enable single filter predicate: "
-                    "Add filter predicate: ")
-                  (bui-available-filter-predicates
-                   (bui-current-entry-type)
-                   (bui-current-buffer-type))))
-         current-prefix-arg))
+   (let ((predicates (bui-available-filter-predicates
+                      (bui-current-entry-type)
+                      (bui-current-buffer-type))))
+     (if (null predicates)
+         (error "Filter predicates are not specified, see '%S' variable"
+                (bui-entry-symbol (bui-current-entry-type)
+                                  'filter-predicates))
+       (list (intern (completing-read
+                      (if current-prefix-arg
+                          "Enable single filter: "
+                        "Add filter: ")
+                      predicates))
+             current-prefix-arg))))
   (or (functionp predicate)
       (error "Wrong filter predicate: %S" predicate))
   (if (if single?
