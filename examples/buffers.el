@@ -19,10 +19,13 @@
 
 ;; This is an example of using BUI (Buffer User Interface) library.
 ;;
-;; It shows how to use bui to display a list of buffers à la `ibuffer'.
+;; It shows how to use bui to display a list of buffers à la
+;; `list-buffers' or `ibuffer'.
+;;
 ;; To try it, load this file (for example, with "M-x load-file"), and
 ;; run "M-x buffers" command.  There you can mark several buffers (with
-;; "m") and press "i" to display the info buffer.
+;; "m") and press "i" to display the info buffer; press "f f" to enable
+;; fiters, etc.
 
 ;;; Code:
 
@@ -60,10 +63,34 @@
 
 (bui-define-entry-type buffers
   :titles '((mod-time . "Modification Time"))
-  :get-entries-function #'buffers-get-entries)
+  :get-entries-function #'buffers-get-entries
+  :filter-predicates
+  '(buffers-buffer-ephemeral?
+    buffers-buffer-non-ephemeral?
+    buffers-buffer-visiting-file?
+    buffers-buffer-not-visiting-file?))
 
 (defun buffers-describe-mode-function (button)
   (describe-function (intern (button-label button))))
+
+
+;;; Filter predicates
+
+(defun buffers-buffer-ephemeral? (entry)
+  "Return non-nil, if ENTRY's buffer name starts with a space."
+  (string= " " (substring (bui-entry-value entry 'name) 0 1)))
+
+(defun buffers-buffer-non-ephemeral? (entry)
+  "Return non-nil, if ENTRY's buffer name does not start with a space."
+  (not (buffers-buffer-ephemeral? entry)))
+
+(defun buffers-buffer-visiting-file? (entry)
+  "Return non-nil, if ENTRY's buffer visits a file."
+  (bui-entry-non-void-value entry 'file-name))
+
+(defun buffers-buffer-not-visiting-file? (entry)
+  "Return non-nil, if ENTRY's buffer does not visit a file."
+  (not (buffers-buffer-visiting-file? entry)))
 
 
 ;;; 'Info' interface
