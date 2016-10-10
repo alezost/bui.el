@@ -361,6 +361,10 @@ accessed with KEYS."
 
 ;;; Misc
 
+(defun bui-fill-column ()
+  "Return fill column for the current window."
+  (min (window-width) fill-column))
+
 (defun bui-filter (list &rest predicates)
   "Apply PREDICATES to all elements from LIST.
 Return a list of elements which satisfy all the PREDICATES."

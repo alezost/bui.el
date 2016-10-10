@@ -207,10 +207,6 @@ See `bui-symbol-specifications' for details.")
               value rest-args)))
     (_ (error "Unknown value method '%S'" method))))
 
-(defun bui-info-fill-column ()
-  "Return fill column for the current window."
-  (min (window-width) fill-column))
-
 (defun bui-info-insert-entries (entries entry-type)
   "Display ENTRY-TYPE ENTRIES in the current info buffer."
   (bui-mapinsert (lambda (entry)
@@ -287,7 +283,7 @@ is a face symbol, propertize inserted line(s) with this face."
            (fill-col (unless (or button?
                                  (and (stringp value)
                                       (not bui-info-fill)))
-                       (- (bui-info-fill-column) indent)))
+                       (- (bui-fill-column) indent)))
            (value    (if (and value button?)
                          (bui-buttonize value button-or-face "\n")
                        value)))
@@ -330,7 +326,7 @@ BUTTON-OR-FACE is a button type)."
          (fill-col (when (or button?
                              bui-info-fill
                              (not (stringp value)))
-                     (- (bui-info-fill-column)
+                     (- (bui-fill-column)
                         (length bui-info-multiline-prefix))))
          (value    (if (and value button?)
                        (apply #'bui-buttonize
