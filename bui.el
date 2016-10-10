@@ -2,6 +2,12 @@
 
 ;; Copyright © 2014-2016 Alex Kost <alezost@gmail.com>
 
+;; Author: Alex Kost <alezost@gmail.com>
+;; Version: 1.0
+;; URL: https://github.com/alezost/bui.el
+;; Keywords: tools
+;; Package-Requires: ((emacs "24.3") (dash "2.11.0"))
+
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
