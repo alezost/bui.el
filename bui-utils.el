@@ -139,6 +139,19 @@ add both to the end and to the beginning."
 
 ;;; Inserting text
 
+(defcustom bui-indent 2
+  "Number of spaces used to indent various parts of inserted text."
+  :type 'integer
+  :group 'bui-info)
+
+(defun bui-get-indent (&optional level)
+  "Return `bui-indent' \"multiplied\" by LEVEL (1 by default) spaces."
+  (make-string (* bui-indent (or level 1)) ?\s))
+
+(defun bui-insert-indent (&optional level)
+  "Insert `bui-indent' spaces LEVEL times (1 by default)."
+  (insert (bui-get-indent level)))
+
 ;; `bui-newline' exists because `newline' does too much.
 (defun bui-newline (&optional n)
   "Insert N (1 by default) number of newlines at point."

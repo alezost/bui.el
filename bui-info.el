@@ -117,11 +117,6 @@ This string is used by `bui-info-insert-value-format'."
   :type 'string
   :group 'bui-info)
 
-(defcustom bui-info-indent 2
-  "Number of spaces used to indent various parts of inserted text."
-  :type 'integer
-  :group 'bui-info)
-
 (defcustom bui-info-delimiter "\n\f\n"
   "String used to separate entries."
   :type 'string
@@ -216,15 +211,6 @@ See `bui-symbol-specifications' for details.")
   "Return fill column for the current window."
   (min (window-width) fill-column))
 
-(defun bui-info-get-indent (&optional level)
-  "Return `bui-info-indent' \"multiplied\" by LEVEL spaces.
-LEVEL is 1 by default."
-  (make-string (* bui-info-indent (or level 1)) ?\s))
-
-(defun bui-info-insert-indent (&optional level)
-  "Insert `bui-info-indent' spaces LEVEL times (1 by default)."
-  (insert (bui-info-get-indent level)))
-
 (defun bui-info-insert-entries (entries entry-type)
   "Display ENTRY-TYPE ENTRIES in the current info buffer."
   (bui-mapinsert (lambda (entry)
@@ -236,9 +222,9 @@ LEVEL is 1 by default."
 (defun bui-info-insert-entry (entry entry-type &optional indent-level)
   "Insert ENTRY-TYPE ENTRY into the current info buffer.
 If INDENT-LEVEL is non-nil, indent displayed data by this number
-of `bui-info-indent' spaces."
+of `bui-indent' spaces."
   (bui-with-indent (* (or indent-level 0)
-                      bui-info-indent)
+                      bui-indent)
     (dolist (spec (bui-info-format entry-type))
       (bui-info-insert-entry-unit spec entry entry-type))))
 
@@ -315,11 +301,11 @@ with `bui-info-insert-title-simple'.
 
 VALUE may be split into several short lines to fit the current
 window, depending on `bui-info-fill', and each line is indented
-with `bui-info-indent'.
+with `bui-indent'.
 
 For the meaning of BUTTON-OR-FACE, see `bui-info-insert-value-simple'."
   (when value (bui-newline))
-  (bui-info-insert-value-simple value button-or-face bui-info-indent))
+  (bui-info-insert-value-simple value button-or-face bui-indent))
 
 (defun bui-info-insert-value-format (value &optional button-or-face
                                            &rest button-properties)

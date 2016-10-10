@@ -110,7 +110,7 @@
 (defun buffers-info-insert-name (name entry)
   (bui-info-insert-value-simple (bui-entry-value entry 'name)
                                 'mode-line-buffer-id)
-  (bui-info-insert-indent)
+  (bui-insert-indent)
   (bui-insert-action-button
    "Switch"
    (lambda (btn)
