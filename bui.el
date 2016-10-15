@@ -34,7 +34,7 @@
 (require 'bui-utils)
 
 (bui-define-groups bui
-  :parent-group external
+  :parent-group tools
   :parent-faces-group faces
   :group-doc "Settings for Buffer User Interface.")
 
