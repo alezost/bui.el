@@ -356,8 +356,8 @@ See `bui-get-time-string' for the meaning of TIME."
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
   "Parent mode for displaying data in 'info' form.")
 
-(defun bui-info-mode-initialize (entry-type)
-  "Set up the current 'info' buffer."
+(defun bui-info-initialize (entry-type)
+  "Set up the current 'info' buffer to display ENTRY-TYPE entries."
   (bui-set-local-variables entry-type 'info
                            (mapcar #'bui-symbol-specification-suffix
                                    bui-info-symbol-specifications))

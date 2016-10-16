@@ -491,8 +491,8 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
 (define-derived-mode bui-list-mode tabulated-list-mode "BUI-List"
   "Parent mode for displaying data in 'list' form.")
 
-(defun bui-list-mode-initialize (entry-type)
-  "Set up the current 'list' buffer for displaying ENTRY-TYPE entries."
+(defun bui-list-initialize (entry-type)
+  "Set up the current 'list' buffer to display ENTRY-TYPE entries."
   (setq tabulated-list-padding  2
         tabulated-list-format   (bui-list-tabulated-format entry-type)
         tabulated-list-sort-key (bui-list-tabulated-sort-key entry-type))

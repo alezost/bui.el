@@ -254,7 +254,7 @@ appropriate ENTRY-TYPE and BUFFER-TYPE.")
   "Function used to set up the buffer.
 This function is called without arguments after enabling the
 mode (right before running mode hooks).  If nil,
-`bui-initialize-mode-default' is called with appropriate
+`bui-mode-initialize-default' is called with appropriate
 ENTRY-TYPE and BUFFER-TYPE.")
 
 (defvar bui-message-function nil
@@ -385,25 +385,25 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
   (apply (bui-symbol-value entry-type buffer-type 'get-entries-function)
          args))
 
-(defun bui-enable-mode (entry-type buffer-type)
+(defun bui-mode-enable (entry-type buffer-type)
   "Turn on major mode to display ENTRY-TYPE ENTRIES in BUFFER-TYPE buffer."
   (funcall (bui-symbol entry-type buffer-type 'mode)))
 
-(defun bui-initialize-mode-default (entry-type buffer-type)
+(defun bui-mode-initialize-default (entry-type buffer-type)
   "Default function to set up BUFFER-TYPE buffer for ENTRY-TYPE entries."
   (setq-local revert-buffer-function 'bui-revert)
   (bui-set-local-variables entry-type buffer-type
                            (mapcar #'bui-symbol-specification-suffix
                                    bui-all-symbol-specifications))
-  (funcall (bui-make-symbol 'bui buffer-type 'mode-initialize)
+  (funcall (bui-make-symbol 'bui buffer-type 'initialize)
            entry-type))
 
-(defun bui-initialize-mode (entry-type buffer-type)
+(defun bui-mode-initialize (entry-type buffer-type)
   "Set up the current BUFFER-TYPE buffer to display ENTRY-TYPE entries."
   (--if-let (bui-symbol-value entry-type buffer-type
                               'mode-initialize-function)
       (funcall it)
-    (bui-initialize-mode-default entry-type buffer-type)))
+    (bui-mode-initialize-default entry-type buffer-type)))
 
 (defun bui-insert-entries (entries entry-type buffer-type)
   "Show ENTRY-TYPE ENTRIES in the current BUFFER-TYPE buffer."
@@ -414,7 +414,7 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
   "Default function to show ENTRY-TYPE ENTRIES in the BUFFER-TYPE buffer."
   (let ((inhibit-read-only t))
     (erase-buffer)
-    (bui-enable-mode entry-type buffer-type)
+    (bui-mode-enable entry-type buffer-type)
     (let ((filtered-entries (apply #'bui-filter
                                    entries bui-active-filter-predicates)))
       (if filtered-entries
@@ -732,7 +732,7 @@ Major mode for displaying '%S' entries in '%S' buffer.
 
 \\{%S}"
                           entry-type buffer-type mode-map)
-                 (bui-initialize-mode ',entry-type ',buffer-type)))
+                 (bui-mode-initialize ',entry-type ',buffer-type)))
 
            (bui-register-interface ',entry-type ',buffer-type))))))
 
