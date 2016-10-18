@@ -379,7 +379,7 @@ SPECIFICATIONS should have a form of `bui-symbol-specifications'."
                      (bui-symbol entry-type buffer-type symbol)))
       (bui-entry-symbol-value entry-type symbol)))
 
-(defun bui-get-entries (entry-type buffer-type args)
+(defun bui-get-entries (entry-type buffer-type &optional args)
   "Return ENTRY-TYPE entries.
 Call an appropriate 'get-entries' function using ARGS as its arguments."
   (apply (bui-symbol-value entry-type buffer-type 'get-entries-function)
@@ -431,13 +431,13 @@ Use '\\[bui-disable-filters]' to remove filters"))))
       (funcall it entries)
     (bui-show-entries-default entries entry-type buffer-type)))
 
-(defun bui-message (entries entry-type buffer-type args)
+(defun bui-message (entries entry-type buffer-type &optional args)
   "Display a message for BUFFER-ITEM after showing entries."
   (--when-let (bui-symbol-value entry-type buffer-type
                                 'message-function)
     (apply it entries args)))
 
-(defun bui-buffer-name (entry-type buffer-type args)
+(defun bui-buffer-name (entry-type buffer-type &optional args)
   "Return name of BUFFER-TYPE buffer for displaying ENTRY-TYPE entries."
   (let ((val (bui-symbol-value entry-type buffer-type 'buffer-name)))
     (cond
@@ -511,24 +511,24 @@ HISTORY should be one of the following:
       (bui-show-entries %entries %entry-type %buffer-type))
     (bui-message %entries %entry-type %buffer-type %args)))
 
-(defun bui-display-entries-current (entries entry-type buffer-type args
-                                    &optional history)
+(defun bui-display-entries-current (entries entry-type buffer-type
+                                    &optional args history)
   "Show ENTRIES in the current BUI buffer.
 See `bui-item' for the meaning of BUFFER-TYPE, ENTRY-TYPE
 and ARGS, and `bui-set' for the meaning of HISTORY."
   (bui-set (bui-make-item entries entry-type buffer-type args)
            history))
 
-(defun bui-get-display-entries-current (entry-type buffer-type args
-                                        &optional history)
+(defun bui-get-display-entries-current (entry-type buffer-type
+                                        &optional args history)
   "Search for entries and show them in the current BUI buffer.
 See `bui-display-entries-current' for details."
   (bui-display-entries-current
    (bui-get-entries entry-type buffer-type args)
    entry-type buffer-type args history))
 
-(defun bui-display-entries (entries entry-type buffer-type args
-                            &optional history)
+(defun bui-display-entries (entries entry-type buffer-type
+                            &optional args history)
   "Show ENTRIES in a BUFFER-TYPE buffer.
 See `bui-display-entries-current' for details."
   (let ((buffer (get-buffer-create
@@ -539,8 +539,8 @@ See `bui-display-entries-current' for details."
     (when entries
       (bui-display buffer))))
 
-(defun bui-get-display-entries (entry-type buffer-type args
-                                &optional history)
+(defun bui-get-display-entries (entry-type buffer-type
+                                &optional args history)
   "Search for entries and show them in a BUFFER-TYPE buffer.
 See `bui-display-entries-current' for details."
   (bui-display-entries
