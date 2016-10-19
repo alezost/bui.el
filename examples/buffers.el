@@ -48,13 +48,19 @@
                dired-directory
              (car dired-directory)))))
 
+(defun buffers-visited-file-modtime ()
+  (let ((time (visited-file-modtime)))
+    (cl-case time
+      ((-1 0) nil)
+      (t time))))
+
 (defun buffers-buffer->entry (buffer)
   (with-current-buffer buffer
     `((id   . ,buffer)
       (name . ,(buffer-name))
       (mode . ,major-mode)
       (size . ,(buffer-size))
-      (mod-time  . ,(visited-file-modtime))
+      (mod-time  . ,(buffers-visited-file-modtime))
       (file-name . ,(buffers-buffer-file-name)))))
 
 (defun buffers-get-entries (&rest args)
@@ -101,7 +107,7 @@
             (size format (format))
             nil
             (file-name nil (simple bui-file))
-            (mod-time format (buffers-info-insert-time))))
+            (mod-time format (time))))
 
 (define-button-type 'buffers-mode-function
   :supertype 'help-function
@@ -118,14 +124,6 @@
    "Switch to this buffer"
    'buffer (bui-entry-id entry)))
 
-(defun buffers-info-insert-time (mod-time)
-  "Insert formatted time string from MOD-TIME returned by
-`visited-file-modtime'."
-  (cl-case mod-time
-    (-1 (bui-format-insert nil))
-    (0 (insert "0"))
-    (t (bui-info-insert-time (time-to-seconds mod-time)))))
-
 
 ;;; 'List' interface
 
@@ -136,20 +134,12 @@
   :format '((name nil 30 t)
             (mode buffers-list-get-mode 25 t)
             (size nil 8 bui-list-sort-numerically-2 :right-align t)
-            ;; (mod-time buffers-list-get-time 20 t)
+            ;; (mod-time bui-list-get-time 20 t)
             (file-name bui-list-get-file-name 30 t))
   :sort-key '(name))
 
 (define-key buffers-list-mode-map (kbd "RET")
   'buffers-list-switch-to-buffer)
-
-(defun buffers-list-get-time (mod-time &optional _)
-  "Return formatted time string from MOD-TIME returned by
-`visited-file-modtime'."
-  (cl-case mod-time
-    (-1 (bui-get-string nil))
-    (0 "0")
-    (t (bui-list-get-time (time-to-seconds mod-time)))))
 
 (defun buffers-list-get-mode (mode &optional _)
   "Return MODE button specification for `tabulated-list-entries'.
