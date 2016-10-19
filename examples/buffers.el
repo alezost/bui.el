@@ -138,8 +138,9 @@
             (file-name bui-list-get-file-name 30 t))
   :sort-key '(name))
 
-(define-key buffers-list-mode-map (kbd "RET")
-  'buffers-list-switch-to-buffer)
+(let ((map buffers-list-mode-map))
+  (define-key map (kbd "RET") 'buffers-list-switch-to-buffer)
+  (define-key map (kbd "k")   'buffers-list-kill-buffers))
 
 (defun buffers-list-get-mode (mode &optional _)
   "Return MODE button specification for `tabulated-list-entries'.
@@ -155,6 +156,14 @@ MODE may be nil."
 (defun buffers-list-switch-to-buffer ()
   (interactive)
   (pop-to-buffer (bui-list-current-id)))
+
+(defun buffers-list-kill-buffers ()
+  "Kill marked buffers (or the current buffer)."
+  (interactive)
+  (dolist (buffer (or (bui-list-get-marked-id-list)
+                      (list (bui-list-current-id))))
+    (kill-buffer buffer))
+  (revert-buffer nil t))
 
 
 ;;; Interactive commands
