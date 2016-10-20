@@ -1,0 +1,93 @@
+* About
+
+=BUI= (=Buffer User Interface=) is an Emacs library that can be used to
+make user interfaces to display some kind of entries (like packages,
+buffers, functions, etc.).
+
+The intention of BUI is to be a high-level library which is convenient
+to be used both by:
+
+- *package makers*, as there is no need to bother about implementing
+  routine details and usual features (like buffer history, filtering
+  displayed entries, etc.);
+
+- *users*, as it provides familiar and intuitive interfaces with usual
+  keys (for moving by lines, marking, sorting, switching between
+  buttons); and what is also important, the defined interfaces are
+  highly configurable through various generated variables.
+
+* Usage
+
+BUI provides means to display entries in 2 types of buffers:
+
+- =list=: it is based on =tabulated-list-mode=, thus it looks similar to
+  a list of Emacs packages (=M-x list-packages=);
+
+- =info=: it can be used to display more verbose info, like various
+  buttons, text and other stuff related to the displayed entry (or
+  entries).
+
+In short, you define how a =list= / =info= interface looks like (using
+=bui-define-interface= macro), and then you can make some user commands
+that will display entries (using =bui-get-display-entries= and similar
+functions).
+
+For example, you can make a =list= interface to display buffers (similar
+to what =M-x list-buffers= do), like this:
+
+#+BEGIN_SRC emacs-lisp
+(require 'bui)
+
+(defun buffers-buffer->entry (buffer)
+  (with-current-buffer buffer
+    `((id   . ,buffer)
+      (name . ,(buffer-name))
+      (mode . ,major-mode)
+      (size . ,(buffer-size))
+      (file-name . ,buffer-file-name))))
+
+(defun buffers-get-entries ()
+  (mapcar 'buffers-buffer->entry (buffer-list)))
+
+(bui-define-interface buffers list
+  :buffer-name "*Buffers*"
+  :get-entries-function 'buffers-get-entries
+  :format '((name nil 30 t)
+            (mode nil 25 t)
+            (size nil 8 bui-list-sort-numerically-2 :right-align t)
+            (file-name bui-list-get-file-name 30 t))
+  :sort-key '(name))
+
+(defun buffers ()
+  "Display a list of buffers."
+  (interactive)
+  (bui-get-display-entries 'buffers 'list))
+#+END_SRC
+
+This is a simplified example just to demonstrate how =bui.el= can be
+used.  For full example see [[file:examples/buffers.el]].  You can see how
+it looks like on the following screenshot.  =M-x buffers= displays a
+list of buffers, then 2 buffers are marked (with =m= key) and
+"described" in =info= buffer (with =i= key).
+
+[[http://i.imgur.com/3dlBu2Y.png]]
+
+=bui-define-interface= macro takes the following arguments:
+
+- ENTRY-TYPE: an arbitrary symbol to denote the entry type.
+
+- BUFFER-TYPE: =list= or =info= symbol.
+
+- Keyword arguments: used to define various interface parameters and to
+  set default values of user variables (like titles, buffer name,
+  etc.).  The main keywords that should be specified are:
+
+  + =:get-entries-function=: this function should return a list of
+    entries to display.  Each entry is a usual association list with one
+    required =id= key (it is used to fill =tabulated-list-entries=
+    variable).
+
+  + =:format=: it specifies how the data is displayed; see docstrings of
+    the generated =ENTRY-TYPE-BUFFER-TYPE-format= variables for details
+    (in the current example: =buffers-list-format= and
+    =buffers-info-format=).
