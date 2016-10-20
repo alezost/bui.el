@@ -42,11 +42,6 @@
   "Face used for titles of parameters."
   :group 'bui-info-faces)
 
-(defface bui-info-time
-  '((t :inherit font-lock-constant-face))
-  "Face used for timestamps."
-  :group 'bui-info-faces)
-
 
 ;;; General 'info' variables
 
@@ -340,7 +335,7 @@ BUTTON-OR-FACE is a button type)."
   "Insert formatted time string using TIME at point.
 See `bui-get-time-string' for the meaning of TIME."
   (bui-format-insert (bui-get-time-string time)
-                     (or face 'bui-info-time)))
+                     (or face 'bui-time)))
 
 
 ;;; Major mode

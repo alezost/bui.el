@@ -26,17 +26,11 @@
 (require 'dash)
 (require 'tabulated-list)
 (require 'bui)
-(require 'bui-info)             ; for faces
-(require 'bui-button)           ; for button types
+(require 'bui-button)
 (require 'bui-entry)
 (require 'bui-utils)
 
 (bui-define-groups bui-list)
-
-(defface bui-list-time
-  '((t :inherit bui-info-time))
-  "Face used for time stamps."
-  :group 'bui-list-faces)
 
 
 ;;; General 'list' variables
@@ -277,7 +271,7 @@ VALUE may be nil."
 TIME may be nil or another value supported by `bui-get-time-string'."
   (bui-get-non-nil time
     (bui-get-string (bui-get-time-string time)
-                    'bui-list-time)))
+                    'bui-time)))
 
 (defun bui-list-get-file-name (file-name &optional _)
   "Return FILE-NAME button specification for `tabulated-list-entries'.

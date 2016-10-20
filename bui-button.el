@@ -1,4 +1,4 @@
-;;; bui-button.el --- Text buttons  -*- lexical-binding: t -*-
+;;; bui-button.el --- Text buttons and faces  -*- lexical-binding: t -*-
 
 ;; Copyright © 2014-2016 Alex Kost <alezost@gmail.com>
 
@@ -17,13 +17,19 @@
 
 ;;; Commentary:
 
-;; This file provides some code to display buttons and work with them.
+;; This file provides general faces and some code to display buttons and
+;; to work with them.
 
 ;;; Code:
 
 (require 'cus-edit)             ; for faces
 (require 'dash)
 (require 'bui-utils)
+
+(defface bui-time
+  '((t :inherit font-lock-constant-face))
+  "Face used for timestamps."
+  :group 'bui-faces)
 
 (defface bui-file-name
   '((t :inherit link))
