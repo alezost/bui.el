@@ -27,21 +27,11 @@
 (require 'tabulated-list)
 (require 'bui)
 (require 'bui-info)             ; for faces
-(require 'bui-button)           ; for faces
+(require 'bui-button)           ; for button types
 (require 'bui-entry)
 (require 'bui-utils)
 
 (bui-define-groups bui-list)
-
-(defface bui-list-file-name
-  '((t :inherit bui-file-name))
-  "Face used for file names."
-  :group 'bui-list-faces)
-
-(defface bui-list-url
-  '((t :inherit bui-url))
-  "Face used for URLs."
-  :group 'bui-list-faces)
 
 (defface bui-list-time
   '((t :inherit bui-info-time))
@@ -293,21 +283,13 @@ TIME may be nil or another value supported by `bui-get-time-string'."
   "Return FILE-NAME button specification for `tabulated-list-entries'.
 FILE-NAME may be nil."
   (bui-get-non-nil file-name
-    (list file-name
-          'face 'bui-list-file-name
-          'action (lambda (btn) (find-file (button-label btn)))
-          'follow-link t
-          'help-echo "Find file")))
+    (list file-name :type 'bui-file)))
 
 (defun bui-list-get-url (url &optional _)
   "Return URL button specification for `tabulated-list-entries'.
 URL may be nil."
   (bui-get-non-nil url
-    (list url
-          'face 'bui-list-url
-          'action (lambda (btn) (browse-url (button-label btn)))
-          'follow-link t
-          'help-echo "Browse URL")))
+    (list url :type 'bui-url)))
 
 
 ;;; 'List' lines
