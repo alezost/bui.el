@@ -1,3 +1,7 @@
+[[http://www.gnu.org/licenses/gpl-3.0.txt][file:https://img.shields.io/badge/license-GPL_3-orange.svg]]
+[[http://melpa.org/#/bui][file:http://melpa.org/packages/bui-badge.svg]]
+[[http://stable.melpa.org/#/bui][file:http://stable.melpa.org/packages/bui-badge.svg]]
+
 * About
 
 =BUI= (=Buffer User Interface=) is an Emacs library that can be used to
