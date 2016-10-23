@@ -76,6 +76,8 @@ list of buffers, then 2 buffers are marked (with =m= key) and
 
 [[http://i.imgur.com/3dlBu2Y.png]]
 
+For a real-world example you may look at [[https://github.com/alezost/aurel][aurel]] package.
+
 =bui-define-interface= macro takes the following arguments:
 
 - ENTRY-TYPE: an arbitrary symbol to denote the entry type.
