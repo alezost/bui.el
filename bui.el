@@ -699,7 +699,7 @@ is nil, along with the mentioned groups and variables,
              ,(format "Faces for displaying '%S' entries in '%S' buffer."
                       entry-type buffer-type)
              :group ',group
-             :group ',(bui-name entry-type 'faces)
+             :group ',(bui-entry-symbol entry-type 'faces)
              :group ',(bui-name buffer-type 'faces))
 
            ,@(bui-map-symbol-specifications
