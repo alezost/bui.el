@@ -34,6 +34,12 @@
 (require 'bui-list)
 (require 'help-mode)  ; for `help-function' button
 
+(bui-define-groups buffers
+  :parent-group tools
+  :parent-faces-group faces
+  :group-doc "Settings for '\\[buffers]' command."
+  :faces-group-doc "Faces for '\\[buffers]' command.")
+
 (defun buffers-get-buffers (&optional search-type &rest search-values)
   (or search-type (setq search-type 'all))
   (cl-case search-type
