@@ -30,8 +30,6 @@
 ;;; Code:
 
 (require 'bui)
-(require 'bui-info)
-(require 'bui-list)
 (require 'help-mode)  ; for `help-function' button
 
 (bui-define-groups buffers

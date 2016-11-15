@@ -41,7 +41,11 @@
 ;;; Code:
 
 (require 'cl-lib)
+
+;; Require all features, so a package maker can require only `bui'.
+(require 'bui-button)
 (require 'bui-core)
+(require 'bui-entry)
 (require 'bui-info)
 (require 'bui-list)
 (require 'bui-utils)
