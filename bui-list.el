@@ -25,7 +25,7 @@
 (require 'cl-lib)
 (require 'dash)
 (require 'tabulated-list)
-(require 'bui)
+(require 'bui-core)
 (require 'bui-button)
 (require 'bui-entry)
 (require 'bui-utils)

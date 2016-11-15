@@ -24,7 +24,7 @@
 ;;; Code:
 
 (require 'dash)
-(require 'bui)
+(require 'bui-core)
 (require 'bui-entry)
 (require 'bui-button)
 (require 'bui-utils)
