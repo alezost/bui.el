@@ -120,22 +120,6 @@ If COLUMN is non-nil, fill STR to this column."
                str)))
     (split-string str "\n *" t)))
 
-(defun bui-concat-strings (strings separator &optional location)
-  "Return new string by concatenating STRINGS with SEPARATOR.
-If LOCATION is a symbol `head', add another SEPARATOR to the
-beginning of the returned string; if `tail' - add SEPARATOR to
-the end of the string; if nil, do not add SEPARATOR; otherwise
-add both to the end and to the beginning."
-  (let ((str (mapconcat #'identity strings separator)))
-    (cond ((null location)
-           str)
-          ((eq location 'head)
-           (concat separator str))
-          ((eq location 'tail)
-           (concat str separator))
-          (t
-           (concat separator str separator)))))
-
 
 ;;; Inserting text
 
@@ -239,16 +223,6 @@ single argument."
   (if (file-exists-p file)
       (funcall bui-find-file-function file)
     (message "File '%s' does not exist." file)))
-
-(defvar url-handler-regexp)
-
-(defun bui-find-file-or-url (file-or-url)
-  "Find FILE-OR-URL."
-  (require 'url-handlers)
-  (let ((file-name-handler-alist
-         (cons (cons url-handler-regexp 'url-file-handler)
-               file-name-handler-alist)))
-    (find-file file-or-url)))
 
 
 ;;; Symbols, keywords, plists
