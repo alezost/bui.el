@@ -359,9 +359,9 @@ If MARK-NAMES are not specified, use all marks from
   (or mark-names
       (setq mark-names
             (delq 'empty (mapcar #'car bui-list-marks))))
-  (--filter (-lambda ((_id name . _))
-              (memq name mark-names))
-            bui-list-marked))
+  (-filter (-lambda ((_id name . _))
+             (memq name mark-names))
+           bui-list-marked))
 
 (defun bui-list-get-marked-args (mark-name)
   "Return list of (ID . ARGS) elements from lines marked with MARK-NAME.
