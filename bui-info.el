@@ -33,7 +33,7 @@
 
 (defface bui-info-heading
   '((((type tty pc) (class color)) :weight bold)
-    (t :inherit variable-pitch :height 1.4 :weight bold))
+    (t :inherit variable-pitch :height 1.2 :weight bold))
   "Face for headings."
   :group 'bui-info-faces)
 
