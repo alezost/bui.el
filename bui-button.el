@@ -72,14 +72,16 @@
   'face 'bui-file-name
   'help-echo "Find file"
   'action (lambda (btn)
-            (bui-find-file (button-label btn))))
+            (bui-find-file (or (button-get btn 'file)
+                               (button-label btn)))))
 
 (define-button-type 'bui-url
   :supertype 'bui
   'face 'bui-url
   'help-echo "Browse URL"
   'action (lambda (btn)
-            (browse-url (button-label btn))))
+            (browse-url (or (button-get btn 'url)
+                            (button-label btn)))))
 
 (defun bui-button-copy-label (&optional position)
   "Copy a label of the button at POSITION into kill ring.

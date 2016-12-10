@@ -277,13 +277,17 @@ TIME may be nil or another value supported by `bui-get-time-string'."
   "Return FILE-NAME button specification for `tabulated-list-entries'.
 FILE-NAME may be nil."
   (bui-get-non-nil file-name
-    (list file-name :type 'bui-file)))
+    (list file-name
+          :type 'bui-file
+          'file file-name)))
 
 (defun bui-list-get-url (url &optional _)
   "Return URL button specification for `tabulated-list-entries'.
 URL may be nil."
   (bui-get-non-nil url
-    (list url :type 'bui-url)))
+    (list url
+          :type 'bui-url
+          'url url)))
 
 
 ;;; 'List' lines
