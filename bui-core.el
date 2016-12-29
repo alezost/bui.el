@@ -158,6 +158,14 @@ See `bui-define-current-args-accessor' for details."
   "Keymap with filter commands for BUI modes.")
 (fset 'bui-filter-map bui-filter-map)
 
+(defcustom bui-filter-predicates nil
+  "List of available filter predicates.
+These predicates are used as completions for
+'\\[bui-enable-filter]' command to hide entries. See
+`bui-active-filter-predicates' for details."
+  :type '(repeat function)
+  :group 'bui)
+
 (defcustom bui-filter-mode-line-string "(f)"
   "String displayed in the mode line when filters are enabled.
 Set it to nil, if you don't want to display such a string."
@@ -190,9 +198,7 @@ available predicates.
 If SINGLE? is non-nil (with prefix argument), make PREDICATE the
 only active one (remove the other active predicates)."
   (interactive
-   (let ((predicates (bui-available-filter-predicates
-                      (bui-current-entry-type)
-                      (bui-current-buffer-type))))
+   (let ((predicates bui-filter-predicates))
      (if (null predicates)
          (error "Filter predicates are not specified, see '%S' variable"
                 (bui-entry-symbol (bui-current-entry-type)
@@ -261,14 +267,6 @@ May be nil, a string or a function returning a string.  The
 function is called with the same arguments as the function used
 to get entries.  If nil, the name is defined automatically."
   :type '(choice string function (const nil))
-  :group 'bui)
-
-(defcustom bui-filter-predicates nil
-  "List of available filter predicates.
-These predicates are used as completions for
-'\\[bui-enable-filter]' command to hide entries. See
-`bui-active-filter-predicates' for details."
-  :type '(repeat function)
   :group 'bui)
 
 (defcustom bui-revert-confirm t
@@ -454,21 +452,9 @@ Use '\\[bui-disable-filters]' to remove filters"))))
                       param)
       (bui-symbol-title param)))
 
-(defun bui-available-filter-predicates (entry-type buffer-type)
-  "Return available filter predicates for ENTRY-TYPE/BUFFER-TYPE."
-  (bui-symbol-value entry-type buffer-type 'filter-predicates))
-
 (defun bui-boolean-param? (entry-type buffer-type param)
   "Return non-nil if PARAM for ENTRY-TYPE/BUFFER-TYPE is boolean."
   (memq param (bui-symbol-value entry-type buffer-type 'boolean-params)))
-
-(defun bui-history-size (entry-type buffer-type)
-  "Return history size for ENTRY-TYPE/BUFFER-TYPE."
-  (bui-symbol-value entry-type buffer-type 'history-size))
-
-(defun bui-revert-confirm? (entry-type buffer-type)
-  "Return 'revert-confirm' value for ENTRY-TYPE/BUFFER-TYPE."
-  (bui-symbol-value entry-type buffer-type 'revert-confirm))
 
 
 ;;; Displaying entries
@@ -548,7 +534,7 @@ See `revert-buffer' for the meaning of NOCONFIRM."
   (bui-with-current-item
     (ignore %entries)           ; to avoid compilation warning
     (when (or noconfirm
-              (not (bui-revert-confirm? %entry-type %buffer-type))
+              (not bui-revert-confirm)
               (y-or-n-p "Update the current buffer? "))
       (bui-get-display-entries-current
        %entry-type %buffer-type %args 'replace))))
