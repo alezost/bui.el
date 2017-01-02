@@ -1,6 +1,6 @@
 ;;; buffers.el --- List of buffers and buffer info
 
-;; Copyright © 2016 Alex Kost <alezost@gmail.com>
+;; Copyright © 2016–2017 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 ;; To try it, load this file (for example, with "M-x load-file"), and
 ;; run "M-x buffers" command.  There you can mark several buffers (with
 ;; "m") and press "i" to display the info buffer; press "f f" to enable
-;; fiters, etc.
+;; fiters, etc.  Press "h" to look at the "hint" (available keys).
 
 ;;; Code:
 
@@ -140,11 +140,22 @@
             (size nil 8 bui-list-sort-numerically-2 :right-align t)
             ;; (mod-time bui-list-get-time 20 t)
             (file-name bui-list-get-file-name 30 t))
+  :hint 'buffers-list-hint
   :sort-key '(name))
 
 (let ((map buffers-list-mode-map))
   (define-key map (kbd "RET") 'buffers-list-switch-to-buffer)
   (define-key map (kbd "k")   'buffers-list-kill-buffers))
+
+(defvar buffers-list-default-hint
+  '(("\\[buffers-list-switch-to-buffer]") " switch to buffer;\n"
+    ("\\[buffers-list-kill-buffers]") " kill buffer(s);\n"))
+
+(defun buffers-list-hint ()
+  "Return a hint string to display in the echo area."
+  (bui-format-hints
+   buffers-list-default-hint
+   (bui-default-hint)))
 
 (defun buffers-list-get-mode (mode &optional _)
   "Return MODE button specification for `tabulated-list-entries'.
