@@ -1,6 +1,6 @@
 ;;; bui-list.el --- 'List' buffer interface for displaying data  -*- lexical-binding: t -*-
 
-;; Copyright © 2014-2016 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -455,10 +455,10 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
     (set-keymap-parent
      map (make-composed-keymap bui-map
                                tabulated-list-mode-map))
-    (define-key map (kbd "RET") 'bui-list-describe)
     (define-key map (kbd "i")   'bui-list-describe)
-    (define-key map (kbd "m")   'bui-list-mark)
+    (define-key map (kbd "RET") 'bui-list-describe)
     (define-key map (kbd "*")   'bui-list-mark)
+    (define-key map (kbd "m")   'bui-list-mark)
     (define-key map (kbd "M")   'bui-list-mark-all)
     (define-key map (kbd "u")   'bui-list-unmark)
     (define-key map (kbd "DEL") 'bui-list-unmark-backward)
@@ -467,6 +467,26 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
     (define-key map [remap tabulated-list-sort] 'bui-list-sort)
     map)
   "Keymap for `bui-list-mode' buffers.")
+
+(defvar bui-list-common-hint
+  '(("\\[bui-list-mark]") " mark; "
+    ("\\[bui-list-unmark]") " unmark; "
+    ("\\[bui-list-unmark-backward]") " unmark backward;\n"
+    ("\\[bui-list-sort]") " sort by column;\n")
+  "Hint with the common keys for 'list' buffer.
+See `bui-hint' for details.")
+
+(defvar bui-list-info-hint
+  '(("\\[bui-list-describe]") " show 'info' buffer;\n")
+  "Hint for 'list' buffer used only when 'info' interface is defined.
+See `bui-hint' for details.")
+
+(defun bui-list-hint ()
+  "Return hint structure for the current 'list' buffer."
+  (bui-format-hints
+   bui-list-common-hint
+   (and (bui-interface-defined? (bui-current-entry-type) 'info)
+        bui-list-info-hint)))
 
 (define-derived-mode bui-list-mode tabulated-list-mode "BUI-List"
   "Parent mode for displaying data in 'list' form.")

@@ -1,6 +1,6 @@
 ;;; bui-core.el --- Core functionality for BUI  -*- lexical-binding: t -*-
 
-;; Copyright © 2014-2016 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -41,8 +41,20 @@
     (define-key map (kbd "g") 'revert-buffer)
     (define-key map (kbd "R") 'bui-redisplay)
     (define-key map (kbd "f") 'bui-filter-map)
+    (define-key map (kbd "h") 'bui-show-hint)
+    (define-key map [remap self-insert-command] 'bui-show-hint)
     map)
   "Parent keymap for all BUI modes.")
+
+(defvar bui-common-hint
+  '("History: "
+    ("\\[bui-history-back]") " go back, "
+    ("\\[bui-history-forward]") " go forward;\n"
+    ("\\[revert-buffer]") " revert (update) buffer;\n"
+    ("\\[bui-show-hint]") " show this hint; "
+    ("\\[describe-mode]") " show full help.")
+  "Hint with keys common for any buffer type.
+See `bui-hint' for details.")
 
 
 ;;; Buffer item
@@ -158,6 +170,12 @@ See `bui-define-current-args-accessor' for details."
   "Keymap with filter commands for BUI modes.")
 (fset 'bui-filter-map bui-filter-map)
 
+(defvar bui-filter-hint
+  '(("\\[bui-enable-filter]") " enable filter; "
+    ("\\[bui-disable-filters]") " disable filters;\n")
+  "Hint with the default keys for filtering.
+See `bui-hint' for details.")
+
 (defcustom bui-filter-predicates nil
   "List of available filter predicates.
 These predicates are used as completions for
@@ -228,6 +246,85 @@ only active one (remove the other active predicates)."
     (bui-filter-current-entries)))
 
 
+;;; Hints
+
+(defface bui-hint-key
+  '((t :inherit font-lock-warning-face))
+  "Face used by `bui-show-hint' to display keys."
+  :group 'bui-faces)
+
+(defvar bui-hint-key-separator ", "
+  "String used to separate keys in `bui-hint'.")
+
+(defvar bui-hint #'bui-default-hint
+  "Hint displayed in the echo area by \\[bui-show-hint].
+
+It can be either a string, a list, or a function returning one of
+those.
+
+If it is a list, its elements should have one of the following
+forms:
+
+  STRING
+  (KEY-STRING ...)
+
+STRING elements are displayed as is.
+
+KEY-STRING elements are highlighted with `bui-hint-key' face and
+are separated with `bui-hint-key-separator'.  Also these strings
+are passed through `substitute-command-keys', so you can use any
+supported structure.
+
+Example of a possible value:
+
+  (\"Press:\\n\" (\"a\" \"b\") \" to do something;\\n\")")
+
+(defun bui-format-hint-keys (key-strings)
+  "Concatenate and highlight KEY-STRINGS.
+See `bui-hint' for details."
+  (mapconcat (lambda (key)
+               (propertize (substitute-command-keys key)
+                           'face 'bui-hint-key))
+             key-strings
+             bui-hint-key-separator))
+
+(defun bui-format-hint (hint)
+  "Return string from HINT that has `bui-hint' form."
+  (pcase hint
+    ((pred null) "")
+    ((pred stringp) hint)
+    ((pred functionp) (funcall hint))
+    ((pred listp)
+     (mapconcat (lambda (list-or-string)
+                  (if (listp list-or-string)
+                      (bui-format-hint-keys list-or-string)
+                    list-or-string))
+                hint ""))
+    (_ (error "Unknown hint type: %S" hint))))
+
+(defun bui-format-hints (&rest hints)
+  "Call `bui-format-hint' on all HINTS and concatenate results."
+  (mapconcat #'bui-format-hint hints ""))
+
+(defun bui-default-hint ()
+  "Return default hint structure for the current buffer."
+  (let* ((buffer-type-hint-fun (bui-make-symbol
+                                'bui (bui-current-buffer-type) 'hint))
+         (buffer-type-hint (and (fboundp buffer-type-hint-fun)
+                                (funcall buffer-type-hint-fun))))
+    (apply #'bui-format-hints
+           (delq nil
+                 (list buffer-type-hint
+                       (and bui-filter-predicates
+                            bui-filter-hint)
+                       bui-common-hint)))))
+
+(defun bui-show-hint ()
+  "Show `bui-hint' in the echo area."
+  (interactive)
+  (message (bui-format-hint bui-hint)))
+
+
 ;;; General variables
 
 (defcustom bui-titles nil
@@ -295,6 +392,7 @@ See `bui-symbol-specifications' for details.")
     (:message-function      message-function)
     (:buffer-name           buffer-name t)
     (:titles                titles always)
+    (:hint                  hint)
     (:history-size          history-size t)
     (:revert-confirm?       revert-confirm t))
   "Specifications for generating interface variables.

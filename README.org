@@ -18,7 +18,8 @@ to be used both by:
 - *users*, as it provides familiar and intuitive interfaces with usual
   keys (for moving by lines, marking, sorting, switching between
   buttons); and what is also important, the defined interfaces are
-  highly configurable through various generated variables.
+  highly configurable through various generated variables.  A summary of
+  available key bindings can be displayed by pressing =h=.
 
 * Usage
 
