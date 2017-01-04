@@ -146,10 +146,6 @@ prefix argument, describe entries marked with any mark."
   "Return a list of ENTRY-TYPE parameters that should be displayed."
   (mapcar #'car (bui-list-format entry-type)))
 
-(defun bui-list-sort-key (entry-type)
-  "Return sort key for ENTRY-TYPE."
-  (bui-list-symbol-value entry-type 'sort-key))
-
 (defun bui-list-show-single-entry? (entry-type)
   "Return non-nil, if a single entry of ENTRY-TYPE should be listed."
   (bui-list-symbol-value entry-type 'show-single))
@@ -197,10 +193,10 @@ See `bui-list-define-numerical-sorter' for details."
 
 (defun bui-list-tabulated-sort-key (entry-type)
   "Return ENTRY-TYPE sort key for `tabulated-list-sort-key'."
-  (let ((sort-key (bui-list-sort-key entry-type)))
-    (and sort-key
-         (cons (bui-list-param-title entry-type (car sort-key))
-               (cdr sort-key)))))
+  (and bui-list-sort-key
+       (cons (bui-list-param-title entry-type
+                                   (car bui-list-sort-key))
+             (cdr bui-list-sort-key))))
 
 (defun bui-list-tabulated-vector (entry-type fun)
   "Call FUN on each column specification for ENTRY-TYPE.
