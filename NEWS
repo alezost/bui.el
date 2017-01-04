@@ -1,0 +1,56 @@
+-*- mode: org -*-
+
+* Changes in 1.1.0 (since 1.0.1)
+
+** Hint system is added
+
+A user can press "h" (or any unbound key) in any 'list' or 'info' buffer
+to display a "hint" (a message with available key bindings).  Also
+'bui-define-interface' macro supports ':hint' argument (thus
+'ENTRY-TYPE-BUFFER-TYPE-hint' variable is generated) to override the
+default hint.
+
+** Changes in mode initializing
+
+Previously, a function specified at ':mode-init-function' interface
+keyword should have called 'bui-mode-initialize-default'.  It is not
+needed anymore ('bui-mode-initialize-default' is deprecated and
+ignored).
+
+** New functions
+
+- 'bui-current-param-title'
+
+** Fixed bugs
+
+*** History size variable is honored
+
+Previously, setting 'ENTRY-TYPE-BUFFER-TYPE-history-size' did not take
+effect.
+
+*** 'bui-list-show-single' variable is honored
+
+Previously, if 'ENTRY-TYPE-BUFFER-TYPE-show-single' was set to nil and
+'bui-list-show-single' to t, a single entry was displayed in 'info'
+buffer anyway; now it is displayed in 'list' buffer.
+
+* Changes in 1.0.1 (since 1.0)
+
+** Several minor bugs fixed
+
+** Only (require 'bui) is needed
+
+Previously, a package maker had to require various BUI features
+depending on what bui code is used; now only (require 'bui) is needed as
+it loads all the rest BUI features.
+
+* 1.0 (initial release)
+
+** History
+
+The ancestor of BUI was some code written in February 2014 as a part of
+[[https://github.com/alezost/aurel][aurel]] package.  Then this code was copied to [[https://github.com/alezost/guix.el][guix.el]], and was heavily
+developed for about 2 years as a part of the Emacs interface for Guix.
+Finally, in September 2016, this code was extracted from "guix.el" and
+became "bui" library (later, both "aurel" and "Emacs-Guix" were switched
+to BUI).
