@@ -198,8 +198,8 @@ See `bui-list-define-numerical-sorter' for details."
                                    (car bui-list-sort-key))
              (cdr bui-list-sort-key))))
 
-(defun bui-list-tabulated-vector (entry-type fun)
-  "Call FUN on each column specification for ENTRY-TYPE.
+(defun bui-list-tabulated-vector (fun)
+  "Call FUN on each column specification.
 
 FUN is applied to column specification as arguments (see
 `bui-list-format').
@@ -208,12 +208,11 @@ Return a vector made of values of FUN calls."
   (apply #'vector
          (mapcar (lambda (col-spec)
                    (apply fun col-spec))
-                 (bui-list-format entry-type))))
+                 bui-list-format)))
 
 (defun bui-list-tabulated-format (entry-type)
   "Return ENTRY-TYPE list specification for `tabulated-list-format'."
   (bui-list-tabulated-vector
-   entry-type
    (lambda (param _ &rest rest-spec)
      (cons (bui-list-param-title entry-type param)
            rest-spec))))
@@ -229,7 +228,6 @@ Return a vector made of values of FUN calls."
   "Return array of values for `tabulated-list-entries'.
 Parameters are taken from ENTRY-TYPE ENTRY."
   (bui-list-tabulated-vector
-   entry-type
    (lambda (param fun &rest _)
      (let ((value (bui-entry-value entry param)))
        (cond
