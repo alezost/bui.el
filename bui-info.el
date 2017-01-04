@@ -355,10 +355,11 @@ See `bui-get-time-string' for the meaning of TIME."
   "Keymap for `bui-info-mode' buffers.")
 
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
-  "Parent mode for displaying data in 'info' form.")
+  "Parent mode for displaying data in 'info' form."
+  (bui-info-initialize))
 
-(defun bui-info-initialize (_entry-type)
-  "Set up the current 'info' buffer to display ENTRY-TYPE entries."
+(defun bui-info-initialize ()
+  "Set up the current 'info' buffer."
   ;; Without this, syntactic fontification is performed, and it may
   ;; break highlighting.  For example, if there is a single "
   ;; (double-quote) character, the default syntactic fontification

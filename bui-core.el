@@ -354,11 +354,10 @@ appropriate ENTRY-TYPE and BUFFER-TYPE.")
 (put 'bui-show-entries-function 'permanent-local t)
 
 (defvar bui-mode-initialize-function nil
-  "Function used to set up the buffer.
+  "Function used to set up the current BUI buffer.
 This function is called without arguments after enabling the
-mode (right before running mode hooks).  If nil,
-`bui-mode-initialize-default' is called with appropriate
-ENTRY-TYPE and BUFFER-TYPE.")
+mode (right before running mode hooks).
+It can also be nil.")
 (put 'bui-mode-initialize-function 'permanent-local t)
 
 (defvar bui-message-function nil
@@ -498,18 +497,14 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
   "Turn on major mode to display ENTRY-TYPE ENTRIES in BUFFER-TYPE buffer."
   (funcall (bui-symbol entry-type buffer-type 'mode)))
 
-(defun bui-mode-initialize-default (entry-type buffer-type)
-  "Default function to set up BUFFER-TYPE buffer for ENTRY-TYPE entries."
-  (setq-local revert-buffer-function 'bui-revert)
-  (funcall (bui-make-symbol 'bui buffer-type 'initialize)
-           entry-type))
+(define-obsolete-function-alias 'bui-mode-initialize-default
+  'ignore "1.1.0")
 
-(defun bui-mode-initialize (entry-type buffer-type)
-  "Set up the current BUFFER-TYPE buffer to display ENTRY-TYPE entries."
-  (--if-let (bui-symbol-value entry-type buffer-type
-                              'mode-initialize-function)
-      (funcall it)
-    (bui-mode-initialize-default entry-type buffer-type)))
+(defun bui-mode-initialize (_entry-type _buffer-type)
+  "Set up the current BUI buffer."
+  (setq-local revert-buffer-function 'bui-revert)
+  (when bui-mode-initialize-function
+    (funcall bui-mode-initialize-function)))
 
 (defun bui-insert-entries (entries entry-type buffer-type)
   "Show ENTRY-TYPE ENTRIES in the current BUFFER-TYPE buffer."

@@ -488,10 +488,11 @@ See `bui-hint' for details.")
         bui-list-info-hint)))
 
 (define-derived-mode bui-list-mode tabulated-list-mode "BUI-List"
-  "Parent mode for displaying data in 'list' form.")
+  "Parent mode for displaying data in 'list' form."
+  (bui-list-initialize))
 
-(defun bui-list-initialize (_entry-type)
-  "Set up the current 'list' buffer to display ENTRY-TYPE entries."
+(defun bui-list-initialize ()
+  "Set up the current 'list' buffer."
   (setq tabulated-list-padding  2
         tabulated-list-format   (bui-list-tabulated-format)
         tabulated-list-sort-key (bui-list-tabulated-sort-key))
