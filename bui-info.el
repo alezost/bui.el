@@ -123,7 +123,6 @@ This string is used by `bui-info-insert-value-format'."
     (:format format always)
     (:ignore-empty-values ignore-empty-values t)
     (:ignore-void-values ignore-void-values t)
-    (:indent indent t)
     (:multiline-prefix multiline-prefix t)
     (:title-format param-title-format t))
   "Specifications for generating 'info' variables.
