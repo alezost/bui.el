@@ -1,6 +1,6 @@
 ;;; bui-info.el --- 'Info' buffer interface for displaying data  -*- lexical-binding: t -*-
 
-;; Copyright © 2014-2016 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
 ;; Copyright © 2015 Ludovic Courtès <ludo@gnu.org>
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -77,22 +77,26 @@ After inserting title/value with such a list METHOD, a new line
 is inserted.
 
 Parameters are inserted in the same order as defined by this list.")
+(put 'bui-info-format 'permanent-local t)
 
 (defcustom bui-info-ignore-empty-values nil
   "If non-nil, do not display non-boolean parameters with nil values."
   :type 'boolean
   :group 'bui-info)
+(put 'bui-info-ignore-empty-values 'permanent-local t)
 
 (defcustom bui-info-ignore-void-values t
   "If non-nil, do not display non-existing parameters."
   :type 'boolean
   :group 'bui-info)
+(put 'bui-info-ignore-void-values 'permanent-local t)
 
 (defcustom bui-info-fill t
   "If non-nil, fill string parameters to fit the window.
 If nil, insert text parameters in a raw form."
   :type 'boolean
   :group 'bui-info)
+(put 'bui-info-fill 'permanent-local t)
 
 (defcustom bui-info-param-title-format "%-18s: "
   "String used to format a title of a parameter.
@@ -101,6 +105,7 @@ with this string, a value of the parameter is inserted.
 This string is used by `bui-info-insert-title-format'."
   :type 'string
   :group 'bui-info)
+(put 'bui-info-param-title-format 'permanent-local t)
 
 (defcustom bui-info-multiline-prefix
   (make-string (length (format bui-info-param-title-format " "))
@@ -111,11 +116,13 @@ in the beginning of each line after the first one.
 This string is used by `bui-info-insert-value-format'."
   :type 'string
   :group 'bui-info)
+(put 'bui-info-multiline-prefix 'permanent-local t)
 
 (defcustom bui-info-delimiter "\n\f\n"
   "String used to separate entries."
   :type 'string
   :group 'bui-info)
+(put 'bui-info-delimiter 'permanent-local t)
 
 (defconst bui-info-symbol-specifications
   '((:delimiter delimiter t)
@@ -350,11 +357,8 @@ See `bui-get-time-string' for the meaning of TIME."
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
   "Parent mode for displaying data in 'info' form.")
 
-(defun bui-info-initialize (entry-type)
+(defun bui-info-initialize (_entry-type)
   "Set up the current 'info' buffer to display ENTRY-TYPE entries."
-  (bui-set-local-variables entry-type 'info
-                           (mapcar #'bui-symbol-specification-suffix
-                                   bui-info-symbol-specifications))
   ;; Without this, syntactic fontification is performed, and it may
   ;; break highlighting.  For example, if there is a single "
   ;; (double-quote) character, the default syntactic fontification

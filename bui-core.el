@@ -183,6 +183,7 @@ These predicates are used as completions for
 `bui-active-filter-predicates' for details."
   :type '(repeat function)
   :group 'bui)
+(put 'bui-filter-predicates 'permanent-local t)
 
 (defcustom bui-filter-mode-line-string "(f)"
   "String displayed in the mode line when filters are enabled.
@@ -278,6 +279,7 @@ supported structure.
 Example of a possible value:
 
   (\"Press:\\n\" (\"a\" \"b\") \" to do something;\\n\")")
+(put 'bui-hint 'permanent-local t)
 
 (defun bui-format-hint-keys (key-strings)
   "Concatenate and highlight KEY-STRINGS.
@@ -331,21 +333,25 @@ See `bui-hint' for details."
   "Alist of titles of parameters."
   :type '(alist :key-type symbol :value-type string)
   :group 'bui)
+(put 'bui-titles 'permanent-local t)
 
 (defvar bui-boolean-params nil
   "List of boolean parameters.
 These parameters are displayed using `bui-false-string' for
 nil values (unlike usual parameters which are displayed using
 `bui-empty-string').")
+(put 'bui-boolean-params 'permanent-local t)
 
 (defvar bui-get-entries-function nil
   "Function used to receive entries.")
+(put 'bui-get-entries-function 'permanent-local t)
 
 (defvar bui-show-entries-function nil
   "Function used to show entries.
 This function is called with a list of entries as a single
 argument.  If nil, `bui-show-entries-default' is called with
 appropriate ENTRY-TYPE and BUFFER-TYPE.")
+(put 'bui-show-entries-function 'permanent-local t)
 
 (defvar bui-mode-initialize-function nil
   "Function used to set up the buffer.
@@ -353,10 +359,12 @@ This function is called without arguments after enabling the
 mode (right before running mode hooks).  If nil,
 `bui-mode-initialize-default' is called with appropriate
 ENTRY-TYPE and BUFFER-TYPE.")
+(put 'bui-mode-initialize-function 'permanent-local t)
 
 (defvar bui-message-function nil
   "Function used to display a message after showing entries.
 If nil, do not display messages.")
+(put 'bui-message-function 'permanent-local t)
 
 (defcustom bui-buffer-name nil
   "Default name of a buffer for displaying entries.
@@ -365,11 +373,13 @@ function is called with the same arguments as the function used
 to get entries.  If nil, the name is defined automatically."
   :type '(choice string function (const nil))
   :group 'bui)
+(put 'bui-buffer-name 'permanent-local t)
 
 (defcustom bui-revert-confirm t
   "If non-nil, ask to confirm for reverting the buffer."
   :type 'boolean
   :group 'bui)
+(put 'bui-revert-confirm 'permanent-local t)
 
 
 ;;; Overriding variables
@@ -411,10 +421,6 @@ variable, unless the defined interface is reduced.  If it is a
 symbol `always', generate the variable even for the reduced
 interface.")
 
-(defconst bui-all-symbol-specifications
-  (append bui-entry-symbol-specifications
-          bui-symbol-specifications))
-
 (defalias 'bui-symbol-specification-keyword #'cl-first
   "Return keyword from symbol specification.")
 
@@ -441,16 +447,29 @@ SPECIFICATIONS should have a form of `bui-symbol-specifications'."
                      (bui-symbol-specification-generate spec)))
           specifications))
 
-(defun bui-set-local-variables (entry-type buffer-type suffixes)
+(defun bui-set-local-variable-maybe (symbol value)
+  "Set SYMBOL's value to VALUE if SYMBOL is bound and VALUE is non-nil."
+  (when (and value (boundp symbol))
+    (set (make-local-variable symbol) value)))
+
+(defun bui-set-local-variables (entry-type buffer-type)
   "Set BUI variables according to ENTRY-TYPE/BUFFER-TYPE variables."
-  (dolist (suffix suffixes)
-    (let ((val (bui-symbol-value entry-type buffer-type suffix)))
-      (when val
-        (let* ((var (bui-make-symbol 'bui buffer-type suffix))
-               (var (if (boundp var)
-                        var
-                      (bui-make-symbol 'bui suffix))))
-          (set (make-local-variable var) val))))))
+  ;; General variables.
+  (dolist (suffix (mapcar #'bui-symbol-specification-suffix
+                          (append bui-entry-symbol-specifications
+                                  bui-symbol-specifications)))
+    (bui-set-local-variable-maybe
+     (bui-make-symbol 'bui suffix)
+     (bui-symbol-value entry-type buffer-type suffix)))
+  ;; Variables specific to BUFFER-TYPE.
+  (dolist (suffix (mapcar #'bui-symbol-specification-suffix
+                          (symbol-value
+                           (bui-symbol-if-bound
+                            (bui-make-symbol
+                             'bui buffer-type 'symbol-specifications)))))
+    (bui-set-local-variable-maybe
+     (bui-make-symbol 'bui buffer-type suffix)
+     (bui-symbol-value entry-type buffer-type suffix))))
 
 
 ;;; Wrappers for defined variables
@@ -482,9 +501,6 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
 (defun bui-mode-initialize-default (entry-type buffer-type)
   "Default function to set up BUFFER-TYPE buffer for ENTRY-TYPE entries."
   (setq-local revert-buffer-function 'bui-revert)
-  (bui-set-local-variables entry-type buffer-type
-                           (mapcar #'bui-symbol-specification-suffix
-                                   bui-all-symbol-specifications))
   (funcall (bui-make-symbol 'bui buffer-type 'initialize)
            entry-type))
 
@@ -578,9 +594,13 @@ HISTORY should be one of the following:
   `replace' - replace the current history item."
   (bui-with-item buffer-item
     (when %entries
-      ;; Set buffer item and history before showing entries, so that
-      ;; they can be used by the code for displaying entries.
+      ;; At first, set buffer item so that its value can be used by the
+      ;; code for displaying entries.
       (setq bui-item buffer-item)
+      (bui-set-local-variables %entry-type %buffer-type)
+      ;; History should be set after setting local variables (after
+      ;; setting `bui-history-size'), but before showing entries (before
+      ;; inserting history buttons).
       (unless (eq history 'no)
         (funcall (cl-ecase history
                    ((nil add) #'bui-history-add)

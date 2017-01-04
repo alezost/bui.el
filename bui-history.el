@@ -1,6 +1,6 @@
 ;;; bui-history.el --- Buffer history  -*- lexical-binding: t -*-
 
-;; Copyright © 2014, 2016 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ If 0, the history is disabled.
 If nil, the history is infinite (until Emacs eats all your memory :-))."
   :type '(choice integer (const :tag "Infinite" nil))
   :group 'bui-history)
+(put 'bui-history-size 'permanent-local t)
 
 (defun bui-history-add (item)
   "Add ITEM to history."

@@ -1,6 +1,6 @@
 ;;; bui-utils.el --- General utility functions  -*- lexical-binding: t -*-
 
-;; Copyright © 2014-2016 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,27 +28,32 @@
   "String used if the value of a parameter is t."
   :type 'string
   :group 'bui)
+(put 'bui-true-string 'permanent-local t)
 
 (defcustom bui-false-string "No"
   "String used if the value of a boolean parameter is nil."
   :type 'string
   :group 'bui)
+(put 'bui-false-string 'permanent-local t)
 
 (defcustom bui-empty-string "—"
   "String used if the value of a non-boolean parameter is nil."
   :type 'string
   :group 'bui)
+(put 'bui-empty-string 'permanent-local t)
 
 (defcustom bui-list-separator ", "
   "String used to seprate list values."
   :type 'string
   :group 'bui)
+(put 'bui-list-separator 'permanent-local t)
 
 (defcustom bui-time-format "%F %T"
   "String used to format time values.
 For possible formats, see `format-time-string'."
   :type 'string
   :group 'bui)
+(put 'bui-time-format 'permanent-local t)
 
 
 ;;; String utils

@@ -50,6 +50,7 @@ entry (alist of parameter names and values).
 
 For the meaning of WIDTH, SORT and PROPS, see
 `tabulated-list-format'.")
+(put 'bui-list-format 'permanent-local t)
 
 (defcustom bui-list-sort-key nil
   "Default sort key for 'list' buffer.
@@ -62,16 +63,19 @@ FLIP, see `tabulated-list-sort-key'."
   :type '(choice (const :tag "No sort" nil)
                  (cons symbol boolean))
   :group 'bui-list)
+(put 'bui-list-sort-key 'permanent-local t)
 
 (defvar bui-list-additional-marks nil
   "Alist of additional marks for 'list' buffer.
 Marks from this list are used along with `bui-list-default-marks'.")
+(put 'bui-list-additional-marks 'permanent-local t)
 
 (defcustom bui-list-show-single nil
   "If non-nil, list an entry even if it is the only matching result.
 If nil, show a single entry in the 'info' buffer instead."
   :type 'boolean
   :group 'bui-list)
+(put 'bui-list-show-single 'permanent-local t)
 
 (defcustom bui-list-describe-warning-count 10
   "The maximum number of entries to describe without a warning.
@@ -80,10 +84,12 @@ you will be prompted for confirmation.  See also
 `bui-list-describe'."
   :type 'integer
   :group 'bui-list)
+(put 'bui-list-describe-warning-count 'permanent-local t)
 
 (defvar bui-list-describe-function nil
   "Function used to describe entries.
 It is applied to the entries IDs as the rest arguments.")
+(put 'bui-list-describe-function 'permanent-local t)
 
 (defconst bui-list-symbol-specifications
   '((:describe-function describe-function)
@@ -496,9 +502,6 @@ See `bui-hint' for details.")
   (setq tabulated-list-padding  2
         tabulated-list-format   (bui-list-tabulated-format entry-type)
         tabulated-list-sort-key (bui-list-tabulated-sort-key entry-type))
-  (bui-set-local-variables entry-type 'list
-                           (mapcar #'bui-symbol-specification-suffix
-                                   bui-list-symbol-specifications))
   (setq-local bui-list-marks (append bui-list-default-marks
                                      bui-list-additional-marks))
   (tabulated-list-init-header))
