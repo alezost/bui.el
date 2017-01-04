@@ -566,6 +566,12 @@ Use '\\[bui-disable-filters]' to remove filters"))))
                       param)
       (bui-symbol-title param)))
 
+(defun bui-current-param-title (param)
+  "Return PARAM title for the current ENTRY-TYPE/BUFFER-TYPE."
+  (bui-param-title (bui-current-entry-type)
+                   (bui-current-buffer-type)
+                   param))
+
 (defun bui-boolean-param? (entry-type buffer-type param)
   "Return non-nil if PARAM for ENTRY-TYPE/BUFFER-TYPE is boolean."
   (memq param (bui-symbol-value entry-type buffer-type 'boolean-params)))

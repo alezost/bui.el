@@ -191,11 +191,10 @@ See `bui-list-define-numerical-sorter' for details."
 
 (bui-list-define-numerical-sorters 9)
 
-(defun bui-list-tabulated-sort-key (entry-type)
-  "Return ENTRY-TYPE sort key for `tabulated-list-sort-key'."
+(defun bui-list-tabulated-sort-key ()
+  "Return sort key for `tabulated-list-sort-key'."
   (and bui-list-sort-key
-       (cons (bui-list-param-title entry-type
-                                   (car bui-list-sort-key))
+       (cons (bui-current-param-title (car bui-list-sort-key))
              (cdr bui-list-sort-key))))
 
 (defun bui-list-tabulated-vector (fun)
@@ -210,11 +209,11 @@ Return a vector made of values of FUN calls."
                    (apply fun col-spec))
                  bui-list-format)))
 
-(defun bui-list-tabulated-format (entry-type)
-  "Return ENTRY-TYPE list specification for `tabulated-list-format'."
+(defun bui-list-tabulated-format ()
+  "Return list specification for `tabulated-list-format'."
   (bui-list-tabulated-vector
    (lambda (param _ &rest rest-spec)
-     (cons (bui-list-param-title entry-type param)
+     (cons (bui-current-param-title param)
            rest-spec))))
 
 (defun bui-list-tabulated-entries (entries entry-type)
@@ -491,11 +490,11 @@ See `bui-hint' for details.")
 (define-derived-mode bui-list-mode tabulated-list-mode "BUI-List"
   "Parent mode for displaying data in 'list' form.")
 
-(defun bui-list-initialize (entry-type)
+(defun bui-list-initialize (_entry-type)
   "Set up the current 'list' buffer to display ENTRY-TYPE entries."
   (setq tabulated-list-padding  2
-        tabulated-list-format   (bui-list-tabulated-format entry-type)
-        tabulated-list-sort-key (bui-list-tabulated-sort-key entry-type))
+        tabulated-list-format   (bui-list-tabulated-format)
+        tabulated-list-sort-key (bui-list-tabulated-sort-key))
   (setq-local bui-list-marks (append bui-list-default-marks
                                      bui-list-additional-marks))
   (tabulated-list-init-header))
