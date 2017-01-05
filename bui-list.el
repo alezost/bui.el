@@ -153,7 +153,8 @@ prefix argument, describe entries marked with any mark."
 
 (defun bui-list-show-single-entry? (entry-type)
   "Return non-nil, if a single entry of ENTRY-TYPE should be listed."
-  (bui-list-symbol-value entry-type 'show-single))
+  (or (bui-list-symbol-value entry-type 'show-single)
+      bui-list-show-single))
 
 
 ;;; Tabulated list internals
