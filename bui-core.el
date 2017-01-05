@@ -46,11 +46,15 @@
     map)
   "Parent keymap for all BUI modes.")
 
-(defvar bui-common-hint
+(defvar bui-history-hint
   '("History: "
     ("\\[bui-history-back]") " go back, "
-    ("\\[bui-history-forward]") " go forward;\n"
-    ("\\[revert-buffer]") " revert (update) buffer;\n"
+    ("\\[bui-history-forward]") " go forward;\n")
+  "Hint with history keys.
+See `bui-hint' for details.")
+
+(defvar bui-common-hint
+  '(("\\[revert-buffer]") " revert (update) buffer;\n"
     ("\\[bui-show-hint]") " show this hint; "
     ("\\[describe-mode]") " show full help.")
   "Hint with keys common for any buffer type.
@@ -319,6 +323,7 @@ See `bui-hint' for details."
                  (list buffer-type-hint
                        (and bui-filter-predicates
                             bui-filter-hint)
+                       bui-history-hint
                        bui-common-hint)))))
 
 (defun bui-show-hint ()

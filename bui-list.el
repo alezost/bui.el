@@ -465,12 +465,16 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
     map)
   "Keymap for `bui-list-mode' buffers.")
 
-(defvar bui-list-common-hint
+(defvar bui-list-mark-hint
   '(("\\[bui-list-mark]") " mark; "
     ("\\[bui-list-unmark]") " unmark; "
-    ("\\[bui-list-unmark-backward]") " unmark backward;\n"
-    ("\\[bui-list-sort]") " sort by column;\n")
-  "Hint with the common keys for 'list' buffer.
+    ("\\[bui-list-unmark-backward]") " unmark backward;\n")
+  "Hint with 'mark' keys for 'list' buffer.
+See `bui-hint' for details.")
+
+(defvar bui-list-sort-hint
+  '(("\\[bui-list-sort]") " sort by column;\n")
+  "Hint with 'sort' keys for 'list' buffer.
 See `bui-hint' for details.")
 
 (defvar bui-list-info-hint
@@ -481,9 +485,10 @@ See `bui-hint' for details.")
 (defun bui-list-hint ()
   "Return hint structure for the current 'list' buffer."
   (bui-format-hints
-   bui-list-common-hint
+   bui-list-mark-hint
    (and (bui-interface-defined? (bui-current-entry-type) 'info)
-        bui-list-info-hint)))
+        bui-list-info-hint)
+   bui-list-sort-hint))
 
 (define-derived-mode bui-list-mode tabulated-list-mode "BUI-List"
   "Parent mode for displaying data in 'list' form."
