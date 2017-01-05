@@ -87,12 +87,14 @@ you will be prompted for confirmation.  See also
 (put 'bui-list-describe-warning-count 'permanent-local t)
 
 (defvar bui-list-describe-function nil
-  "Function used to describe entries.
-It is applied to the entries IDs as the rest arguments.")
+  "Function used by `bui-list-describe'.
+It is applied to the entries IDs as the rest arguments.
+If nil, 'describing' is not performed (it usually means that
+'info' interface is not defined).")
 (put 'bui-list-describe-function 'permanent-local t)
 
 (defconst bui-list-symbol-specifications
-  '((:describe-function describe-function)
+  '((:describe-function describe-function t)
     (:describe-count    describe-warning-count t)
     (:format            format t)
     (:list-single?      show-single t)
@@ -114,14 +116,17 @@ Available MARK-NAMES are symbols from `bui-list-marks'.
 Interactively, describe entries marked with a general mark.  With
 prefix argument, describe entries marked with any mark."
   (interactive (unless current-prefix-arg '(general)))
-  (let* ((ids        (or (apply #'bui-list-get-marked-id-list mark-names)
-                         (list (bui-list-current-id))))
-         (count      (length ids))
-         (entry-type (bui-current-entry-type)))
+  (or bui-list-describe-function
+      (error "Can't display 'info' buffer: '%S' is unset"
+             (bui-list-symbol (bui-current-entry-type)
+                              'describe-function)))
+  (let* ((ids   (or (apply #'bui-list-get-marked-id-list mark-names)
+                    (list (bui-list-current-id))))
+         (count (length ids)))
     (when (or (<= count bui-list-describe-warning-count)
               (y-or-n-p (format "Do you really want to describe %d entries? "
                                 count)))
-      (bui-list-describe-entries entry-type ids))))
+      (apply bui-list-describe-function ids))))
 
 
 ;;; Wrappers for 'list' variables
@@ -149,14 +154,6 @@ prefix argument, describe entries marked with any mark."
 (defun bui-list-show-single-entry? (entry-type)
   "Return non-nil, if a single entry of ENTRY-TYPE should be listed."
   (bui-list-symbol-value entry-type 'show-single))
-
-(defun bui-list-describe-entries (entry-type ids)
-  "Describe ENTRY-TYPE entries with IDS in 'info' buffer."
-  (--if-let (bui-list-symbol-value entry-type 'describe-function)
-      (apply it ids)
-    (error "Can't describe %s: '%S' is unset or undefined"
-           (if (null (cdr ids)) "this entry" "these entries")
-           (bui-list-symbol entry-type 'describe-function))))
 
 
 ;;; Tabulated list internals
