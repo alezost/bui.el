@@ -58,6 +58,12 @@ For possible formats, see `format-time-string'."
 
 ;;; String utils
 
+(defun bui-propertize-maybe (string &optional face)
+  "Return STRING propertized with FACE font-lock-face if it is non nil."
+  (if face
+      (propertize string 'font-lock-face face)
+    string))
+
 (defun bui-get-string (value &optional face)
   "Convert VALUE into a string and return it.
 
@@ -67,19 +73,22 @@ If VALUE is t/nil, it is replaced with
 If VALUE is list, its elements are concatenated using
 `bui-list-separator'.
 
-If FACE is non-nil, propertize returned string with this FACE."
-  (let ((str (cond
-              ((stringp value) value)
-              ((null value) bui-empty-string)
-              ((eq t value) bui-true-string)
-              ((numberp value) (number-to-string value))
-              ((listp value) (mapconcat #'bui-get-string
-                                        value
-                                        bui-list-separator))
-              (t (prin1-to-string value)))))
-    (if (and value face)
-        (propertize str 'font-lock-face face)
-      str)))
+If FACE is non-nil, propertize returned string with this FACE.
+If VALUE is nil, it is not propertized."
+  (cond
+   ((null value) bui-empty-string)
+   ((listp value)
+    (mapconcat (lambda (val)
+                 (bui-propertize-maybe (bui-get-string val) face))
+               value
+               bui-list-separator))
+   (t
+    (let ((str (cond
+                ((stringp value) value)
+                ((eq t value) bui-true-string)
+                ((numberp value) (number-to-string value))
+                (t (prin1-to-string value)))))
+      (bui-propertize-maybe str face)))))
 
 (defmacro bui-get-non-nil (&optional value &rest body)
   "Return `bui-empty-string' if VALUE is nil, evaluate BODY otherwise."
