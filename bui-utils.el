@@ -214,9 +214,9 @@ longer than COLUMN, split it into several short lines.
 
 Separate inserted lines with SEPARATOR."
   (bui-insert-non-nil value
-    (let ((strings (bui-split-string (bui-get-string value) column)))
-      (bui-mapinsert (lambda (str)
-                       (bui-format-insert str face))
+    (let ((strings (bui-split-string (bui-get-string value face)
+                                     column)))
+      (bui-mapinsert #'insert
                      strings
                      (or separator "")))))
 
