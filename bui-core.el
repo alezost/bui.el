@@ -258,6 +258,13 @@ only active one (remove the other active predicates)."
   "Face used by `bui-show-hint' to display keys."
   :group 'bui-faces)
 
+(defcustom bui-hint-format "[%s]"
+  "String used to format each key in `bui-hint'.
+This string should contain a single '%s' structure that will be
+replaced by a key string."
+  :type 'string
+  :group 'bui)
+
 (defvar bui-hint-key-separator ", "
   "String used to separate keys in `bui-hint'.")
 
@@ -289,8 +296,9 @@ Example of a possible value:
   "Concatenate and highlight KEY-STRINGS.
 See `bui-hint' for details."
   (mapconcat (lambda (key)
-               (propertize (substitute-command-keys key)
-                           'face 'bui-hint-key))
+               (format bui-hint-format
+                       (propertize (substitute-command-keys key)
+                                   'face 'bui-hint-key)))
              key-strings
              bui-hint-key-separator))
 
