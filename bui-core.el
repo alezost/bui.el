@@ -533,9 +533,10 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
                                    entries bui-active-filter-predicates)))
       (if filtered-entries
           (bui-insert-entries filtered-entries entry-type buffer-type)
-        (message (substitute-command-keys
-                  "Everything is filtered out :-)
-Use '\\[bui-disable-filters]' to remove filters"))))
+        (when entries
+          (message (substitute-command-keys
+                    "Everything is filtered out :-)
+Use '\\[bui-disable-filters]' to remove filters")))))
     (goto-char (point-min))))
 
 (defun bui-show-entries (entries entry-type buffer-type)
