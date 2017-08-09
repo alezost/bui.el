@@ -644,13 +644,14 @@ See `bui-display-entries-current' for details."
                             &optional args history)
   "Show ENTRIES in a BUFFER-TYPE buffer.
 See `bui-display-entries-current' for details."
-  (let ((buffer (get-buffer-create
-                 (bui-buffer-name entry-type buffer-type args))))
-    (with-current-buffer buffer
-      (bui-display-entries-current
-       entries entry-type buffer-type args history))
-    (when entries
-      (bui-display buffer))))
+  (if entries
+      (let ((buffer (get-buffer-create
+                     (bui-buffer-name entry-type buffer-type args))))
+        (with-current-buffer buffer
+          (bui-display-entries-current
+           entries entry-type buffer-type args history))
+        (bui-display buffer))
+    (bui-message entries entry-type buffer-type args)))
 
 (defun bui-get-display-entries (entry-type buffer-type
                                 &optional args history)
