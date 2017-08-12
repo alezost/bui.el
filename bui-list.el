@@ -376,6 +376,13 @@ See `bui-list-marked' for the meaning of ARGS."
 See `bui-list-get-marked' for details."
   (mapcar #'car (apply #'bui-list-get-marked mark-names)))
 
+(defun bui-list-marked-or-current (&rest mark-names)
+  "Return a list of IDs of the marked entries.
+If nothing is marked, return a list with ID of the current entry.
+See `bui-list-get-marked' for the meaning of MARK-NAMES."
+  (or (apply #'bui-list-get-marked-id-list mark-names)
+      (list (bui-list-current-id))))
+
 (defun bui-list--mark (mark-name &optional advance &rest args)
   "Put a mark on the current line.
 Also add the current entry to `bui-list-marked' using its ID and ARGS.
