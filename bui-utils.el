@@ -367,7 +367,7 @@ Return a list of elements which satisfy all the PREDICATES."
 If NO-MESSAGE? is non-nil, do not display a message about it."
   (kill-new string)
   (unless no-message?
-    (message "'%s' has been added to kill ring." string)))
+    (message "'%s' has been added to the kill ring." string)))
 
 (defmacro bui-define-groups (name &rest args)
   "Define `NAME' and `NAME-faces' customization groups.
