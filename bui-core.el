@@ -157,6 +157,7 @@ Return '%s' of the current buffer.
 (defmacro bui-define-current-args-accessors (prefix &rest names)
   "Define `PREFIX-NAME' functions for NAMES.
 See `bui-define-current-args-accessor' for details."
+  (declare (indent 1))
   `(progn
      ,@(cl-loop for name in names
                 for i from 0
