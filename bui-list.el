@@ -1,6 +1,6 @@
 ;;; bui-list.el --- 'List' buffer interface for displaying data  -*- lexical-binding: t -*-
 
-;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2018 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -382,6 +382,13 @@ If nothing is marked, return a list with ID of the current entry.
 See `bui-list-get-marked' for the meaning of MARK-NAMES."
   (or (apply #'bui-list-get-marked-id-list mark-names)
       (list (bui-list-current-id))))
+
+(defun bui-list-map-marked (function &rest mark-names)
+  "Apply FUNCTION to each element of the marked entries.
+If nothing is marked, call FUNCTION on the current entry.
+See `bui-list-get-marked' for the meaning of MARK-NAMES."
+  (mapcar function
+          (apply #'bui-list-marked-or-current mark-names)))
 
 (defun bui-list--mark (mark-name &optional advance &rest args)
   "Put a mark on the current line.
