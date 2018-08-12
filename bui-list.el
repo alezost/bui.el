@@ -352,6 +352,11 @@ ARGS is a list of additional values.")
   "Return mark character of the current line."
   (char-after (line-beginning-position)))
 
+(defun bui-list-current-mark-name ()
+  "Return name of the mark on the current line."
+  (or (car (bui-assq-value bui-list-marked (bui-list-current-id)))
+      'empty))
+
 (defun bui-list-get-marked (&rest mark-names)
   "Return list of specs of entries marked with any mark from MARK-NAMES.
 Entry specs are elements from `bui-list-marked' list.
@@ -420,7 +425,14 @@ MARK-NAME is a symbol from `bui-list-marks'.
 Interactively, put a general mark on all lines."
   (interactive)
   (or mark-name (setq mark-name 'general))
-  (bui-list-for-each-line #'bui-list--mark mark-name))
+  (setq bui-list-marked
+        (if (eq mark-name 'empty)
+            nil
+          (mapcar (lambda (entry)
+                    (list (bui-entry-id entry) mark-name))
+                  (bui-current-entries))))
+  (bui-list-for-each-line #'tabulated-list-put-tag
+                          (bui-list-get-mark-string mark-name)))
 
 (defun bui-list-unmark (&optional arg)
   "Unmark the current line and move to the next line.
@@ -445,10 +457,10 @@ With ARG, unmark all lines."
   "Put marks according to `bui-list-marked'."
   (bui-list-for-each-line
    (lambda ()
-     (let ((mark-name (car (bui-assq-value bui-list-marked
-                                           (bui-list-current-id)))))
-       (tabulated-list-put-tag
-        (bui-list-get-mark-string (or mark-name 'empty)))))))
+     (let ((mark-name (bui-list-current-mark-name)))
+       (unless (eq mark-name 'empty)
+         (tabulated-list-put-tag
+          (bui-list-get-mark-string mark-name)))))))
 
 (defun bui-list-sort (&optional n)
   "Sort list entries by the column at point.
