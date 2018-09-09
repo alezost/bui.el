@@ -174,16 +174,6 @@ Major mode for displaying '%S' entries in '%S' buffer.
 
            (bui-register-interface ',entry-type ',buffer-type))))))
 
-
-(defvar bui-font-lock-keywords
-  (eval-when-compile
-    `((,(rx "(" (group (or "bui-define-entry-type"
-                           "bui-define-interface"))
-            symbol-end)
-       . 1))))
-
-(font-lock-add-keywords 'emacs-lisp-mode bui-font-lock-keywords)
-
 (provide 'bui)
 
 ;;; bui.el ends here

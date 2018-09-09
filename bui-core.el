@@ -725,16 +725,6 @@ This function does not update the buffer data, use
   (cl-pushnew (bui-interface-id entry-type buffer-type)
               bui-interfaces))
 
-
-(defvar bui-core-font-lock-keywords
-  (eval-when-compile
-    `((,(rx "(" (group (or "bui-with-item"
-                           "bui-with-current-item"))
-            symbol-end)
-       . 1))))
-
-(font-lock-add-keywords 'emacs-lisp-mode bui-core-font-lock-keywords)
-
 (provide 'bui-core)
 
 ;;; bui-core.el ends here

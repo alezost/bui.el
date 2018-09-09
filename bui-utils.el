@@ -431,19 +431,6 @@ return `defcustom' clause instead."
            :group ',group)
       `(defvar ,symbol ,val ,doc))))
 
-
-(defvar bui-utils-font-lock-keywords
-  (eval-when-compile
-    `((,(rx "(" (group (or "bui-with-indent"
-                           "bui-get-non-nil"
-                           "bui-insert-non-nil"
-                           "bui-plist-let"
-                           "bui-define-groups"))
-            symbol-end)
-       . 1))))
-
-(font-lock-add-keywords 'emacs-lisp-mode bui-utils-font-lock-keywords)
-
 (provide 'bui-utils)
 
 ;;; bui-utils.el ends here
