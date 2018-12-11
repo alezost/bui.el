@@ -228,8 +228,10 @@ Parameters are taken from ENTRY-TYPE ENTRY."
    (lambda (param fun &rest _)
      (let ((value (bui-entry-value entry param)))
        (cond
-        ((bui-void-value? value) bui-empty-string)
+        ;; If function is specified, then it should probably return
+        ;; something, even if VALUE is void, so give it the precedence.
         (fun (funcall fun value entry))
+        ((bui-void-value? value) bui-empty-string)
         ((and (null value)
               (bui-boolean-param? entry-type 'list param))
          bui-false-string)
