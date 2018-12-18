@@ -1,5 +1,28 @@
 -*- mode: org -*-
 
+* Changes in 1.2.1 (since 1.2.0)
+
+The only change is: if list format function is specified (in
+'ENTRY-TYPE-list-format' variable), it is called even if an entry does
+not have an according parameter.  This allows to use non-existing
+parameters in the format variable, for example, if this variable has
+(fake some-fun 10 t) specification in it, 'some-fun' will be called even
+if 'fake' parameter does not exist.  Previously, the function was
+ignored in such cases, and 'bui-empty-string' was used instead.
+
+* Changes in 1.2.0 (since 1.1.0)
+
+** New functions
+
+- bui-list-marked-or-current
+- bui-list-map-marked
+
+** New variables
+
+- bui-hint-format
+
+** Minor performance improvements
+
 * Changes in 1.1.0 (since 1.0.1)
 
 ** Hint system is added
