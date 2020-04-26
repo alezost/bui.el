@@ -43,7 +43,7 @@
 (put 'bui-empty-string 'permanent-local t)
 
 (defcustom bui-list-separator ", "
-  "String used to seprate list values."
+  "String used to separate list values."
   :type 'string
   :group 'bui)
 (put 'bui-list-separator 'permanent-local t)
@@ -274,7 +274,7 @@ Each element of VARLIST has a form:
 
   (SYMBOL KEYWORD [DEFAULT-VALUE])
 
-SYMBOL is a varible name.  KEYWORD is a symbol that will be
+SYMBOL is a variable name.  KEYWORD is a symbol that will be
 searched in ARGS for an according value.  If the value of KEYWORD
 does not exist, bind SYMBOL to DEFAULT-VALUE or nil.
 

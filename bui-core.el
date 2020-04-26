@@ -676,7 +676,7 @@ See `revert-buffer' for the meaning of NOCONFIRM."
 
 (defvar bui-after-redisplay-hook nil
   "Hook run by `bui-redisplay'.
-This hook is called before seting up a window position.")
+This hook is called before setting up a window position.")
 
 (defun bui-redisplay ()
   "Redisplay the current BUI buffer.
