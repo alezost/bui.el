@@ -25,7 +25,7 @@
 ;; To try it, load this file (for example, with "M-x load-file"), and
 ;; run "M-x buffers" command.  There you can mark several buffers (with
 ;; "m") and press "i" to display the info buffer; press "f f" to enable
-;; fiters, etc.  Press "h" to look at the "hint" (available keys).
+;; filters, etc.  Press "h" to look at the "hint" (available keys).
 
 ;;; Code:
 
