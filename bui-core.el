@@ -1,6 +1,7 @@
 ;;; bui-core.el --- Core functionality for BUI  -*- lexical-binding: t -*-
 
 ;; Copyright © 2014–2017, 2021 Alex Kost <alezost@gmail.com>
+;; Copyright © 2020 Joe Bloggs <vapniks@yahoo.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -181,7 +182,8 @@ See `bui-define-current-args-accessor' for details."
   "Hint with the default keys for filtering.
 See `bui-hint' for details.")
 
-(defcustom bui-filter-predicates nil
+(defcustom bui-filter-predicates
+  '(bui-filter-by-regexp bui-filter-by-sexp)
   "List of available filter predicates.
 These predicates are used as completions for
 '\\[bui-enable-filter]' command to hide entries. See
@@ -214,6 +216,33 @@ If PREDICATES are not specified, display all entries."
                     (bui-current-entry-type)
                     (bui-current-buffer-type)))
 
+(defun bui-filter-by-regexp (entry param regexp)
+  "Filter the current entries by regexp.
+Return non-nil, if ENTRY's parameter PARAM matches REGEXP.
+Interactively, prompt for PARAM and REGEXP."
+  (interactive
+   (list '<>
+         (intern
+          (completing-read "Parameter: "
+		           (mapcar #'symbol-name (bui-current-params))))
+	 (read-regexp "Regexp: ")))
+  (string-match-p regexp
+                  (bui-get-string (bui-assq-value entry param))))
+
+(defun bui-filter-by-sexp (entry sexp)
+  "Filter the current entries using sexp.
+Evaluate SEXP and return its value.
+SEXP can use the ENTRY's parameters as symbols, e.g.:
+
+  '(or (string-match-p \"foo\" name)
+       (string-match-p \"bar\" synopsis))
+"
+  (interactive (list '<> (read--expression "sexp: ")))
+  (dolist (param (bui-current-params))
+    (setq sexp (cl-subst (bui-assq-value entry param)
+                         param sexp)))
+  (eval sexp))
+
 (defun bui-enable-filter (predicate &optional single?)
   "Apply filter PREDICATE to the current entries.
 Interactively, prompt for PREDICATE, choosing candidates from the
@@ -235,6 +264,7 @@ only active one (remove the other active predicates)."
              current-prefix-arg))))
   (or (functionp predicate)
       (error "Wrong filter predicate: %S" predicate))
+  (setq predicate (bui-apply-interactive predicate))
   (if (if single?
           (equal (list predicate) bui-active-filter-predicates)
         (memq predicate bui-active-filter-predicates))

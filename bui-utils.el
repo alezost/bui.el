@@ -1,6 +1,7 @@
 ;;; bui-utils.el --- General utility functions  -*- lexical-binding: t -*-
 
-;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2017, 2021 Alex Kost <alezost@gmail.com>
+;; Copyright © 2020 Joe Bloggs <vapniks@yahoo.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -430,6 +431,52 @@ return `defcustom' clause instead."
            :type ',type
            :group ',group)
       `(defvar ,symbol ,val ,doc))))
+
+(defun bui-apply-interactive (function)
+  "Call the interactive form of FUNCTION to (partially) apply arguments.
+Return FUNCTION, if it has no `interactive' form.  Otherwise,
+return a new function that does the same as FUNCTION, except its
+arguments are fixed to the values obtained interactively during
+this FUNCTION call.
+
+Any `<>' symbols returned by the `interactive' form of FUNCTION will be
+used as the place holders for arguments of the returned function.
+Also, if the `interactive' form returns a '&rest symbol, this will
+be used in the arglist of the returned function.
+
+For example, the following call:
+
+ (bui-apply-interactive
+  (lambda (x y &rest z)
+    (interactive (list (read-number \"Factor: \")
+		       '<> '&rest '<>))
+    (* x (apply '+ y z))))
+
+will prompt for a number, x, and return a function that takes any
+number of arguments, adds them together and multiplies the result
+by x."
+  (let ((interact (interactive-form function)))
+    (if interact
+	(let* ((args  (eval `(call-interactively
+			      (lambda (&rest args) ,interact args))))
+	       (args2 (mapcar (lambda (x) (if (eq x '<>) (gensym) x))
+			      (cl-remove-if-not
+                               (lambda (y) (memq y '(<> &rest)))
+			       args)))
+	       (args3 (remove '&rest args))
+	       (args4 (remove '&rest args2))
+	       (restp (memq '&rest args2)))
+	  ;; Use `eval' rather than `macroexpand' so that the function
+	  ;; can be called with `funcall'.
+	  (eval `(lambda ,args2
+		   (,@(if restp `(apply ,function) `(,function))
+		    ,@(mapcar
+		       (lambda (x) (if (eq x '<>) (pop args4)
+				     (if (or (symbolp x) (listp x))
+					 (list 'quote x)
+				       x)))
+		       args3)))))
+      function)))
 
 (provide 'bui-utils)
 
