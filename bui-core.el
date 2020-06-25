@@ -181,7 +181,7 @@ See `bui-define-current-args-accessor' for details."
   "Hint with the default keys for filtering.
 See `bui-hint' for details.")
 
-(defcustom bui-filter-predicates nil
+(defcustom bui-filter-predicates '(bui-filter-by-col bui-filter-by-expr)
   "List of available filter predicates.
 These predicates are used as completions for
 '\\[bui-enable-filter]' command to hide entries. See
@@ -214,6 +214,69 @@ If PREDICATES are not specified, display all entries."
                     (bui-current-entry-type)
                     (bui-current-buffer-type)))
 
+(defun apply-interactive (func)
+  "Call the interactive form of FUNC to (partially) apply arguments.
+Return value is a function that does the same as FUNC, except that
+it's arguments are fixed to the values obtained interactively during
+this function call. If FUNC has no `interactive' form then it is
+returned unchanged.
+Any '<> symbols returned by the `interactive' form in FUNC will be
+used as place holders for arguments of the returned function.
+Also, if the `interactive' form returns a '&rest symbol this will
+be used in the arglist of the returned function.
+For example, the following call:
+
+ (apply-interactive
+  (lambda (x y &rest z)
+    (interactive (list (read-number \"Factor: \")
+		       '<> '&rest '<>))
+    (* x (apply '+ y z))))
+
+will prompt for a number, x, and return a function that takes any
+number of arguments, adds them together and multiplies the result
+by x."
+  (let ((interact (interactive-form func)))
+    (if interact
+	(let* ((args (eval `(call-interactively
+			     (lambda (&rest args) ,interact args))))
+	       (args2 (mapcar (lambda (x) (if (eq x '<>) (gensym) x))
+			      (remove-if-not (lambda (y) (memq y '(<> &rest)))
+					     args)))
+	       (args3 (remove '&rest args))
+	       (args4 (remove '&rest args2))
+	       (restp (memq '&rest args2)))
+	  ;; Use `eval' rather than `macroexpand' so that function can be called with `funcall'
+	  (eval `(lambda ,args2
+		   (,@(if restp `(apply ,func) `(,func))
+		    ,@(mapcar
+		       (lambda (x) (if (eq x '<>) (pop args4)
+				     (if (or (symbolp x) (listp x))
+					 (list 'quote x)
+				       x)))
+		       args3)))))
+      func)))
+
+(defun bui-filter-by-col (item col regex)
+  "Predicate function for use with `bui-enable-filter'.
+Prompts the user for a COL and a REGEX, and returns non-nil if ITEM matches the regexp
+ in that column."
+  (interactive (list '<> (ido-completing-read
+			  "Column: "
+			  (mapcar (lambda (x) (symbol-name (car x))) bui-list-format))
+		     (read-regexp "Regexp: ")))
+  (string-match regex (cdr (assq (intern col) item))))
+
+(defun bui-filter-by-expr (item sexp)
+  "Predicate function for use with `bui-enable-filter'.
+Prompts the user for an SEXP which may make use of column names as symbols
+ (e.g. '(or (string-match name \"foo\") (string-match synopsis \"bar\"))),
+and returns non-nil if the SEXP evals to non-nil when the column name symbols
+are bound to the corresponding values in ITEM."
+  (interactive (list '<> (read-minibuffer "Expression: ")))
+  (eval `(let ,(cl-loop for symb in (mapcar 'car bui-list-format)
+			collect (list symb (cdr (assoc symb item))))
+	   ,sexp)))
+
 (defun bui-enable-filter (predicate &optional single?)
   "Apply filter PREDICATE to the current entries.
 Interactively, prompt for PREDICATE, choosing candidates from the
@@ -235,6 +298,7 @@ only active one (remove the other active predicates)."
              current-prefix-arg))))
   (or (functionp predicate)
       (error "Wrong filter predicate: %S" predicate))
+  (setq predicate (apply-interactive predicate))
   (if (if single?
           (equal (list predicate) bui-active-filter-predicates)
         (memq predicate bui-active-filter-predicates))
