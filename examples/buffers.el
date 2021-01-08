@@ -1,6 +1,6 @@
 ;;; buffers.el --- List of buffers and buffer info
 
-;; Copyright © 2016–2017 Alex Kost <alezost@gmail.com>
+;; Copyright © 2016–2017, 2021 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -75,10 +75,11 @@
   :titles '((mod-time . "Modification Time"))
   :get-entries-function #'buffers-get-entries
   :filter-predicates
-  '(buffers-buffer-ephemeral?
-    buffers-buffer-non-ephemeral?
-    buffers-buffer-visiting-file?
-    buffers-buffer-not-visiting-file?))
+  (append bui-filter-predicates
+          '(buffers-buffer-ephemeral?
+            buffers-buffer-non-ephemeral?
+            buffers-buffer-visiting-file?
+            buffers-buffer-not-visiting-file?)))
 
 (defun buffers-describe-mode-function (button)
   (describe-function (intern (button-label button))))
