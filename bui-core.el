@@ -1,6 +1,6 @@
 ;;; bui-core.el --- Core functionality for BUI  -*- lexical-binding: t -*-
 
-;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2017, 2021 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -585,6 +585,13 @@ Use '\\[bui-disable-filters]' to remove filters")))))
 (defun bui-boolean-param? (entry-type buffer-type param)
   "Return non-nil if PARAM for ENTRY-TYPE/BUFFER-TYPE is boolean."
   (memq param (bui-symbol-value entry-type buffer-type 'boolean-params)))
+
+(defun bui-current-params ()
+  "Return parameter names of the current buffer."
+  (mapcar #'car
+          (bui-symbol-value (bui-current-entry-type)
+                            (bui-current-buffer-type)
+                            'format)))
 
 
 ;;; Displaying entries
