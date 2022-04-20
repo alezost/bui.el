@@ -459,7 +459,7 @@ by x."
     (if interact
 	(let* ((args  (eval `(call-interactively
 			      (lambda (&rest args) ,interact args))))
-	       (args2 (mapcar (lambda (x) (if (eq x '<>) (gensym) x))
+	       (args2 (mapcar (lambda (x) (if (eq x '<>) (cl-gensym) x))
 			      (cl-remove-if-not
                                (lambda (y) (memq y '(<> &rest)))
 			       args)))
