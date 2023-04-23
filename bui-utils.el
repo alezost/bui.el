@@ -284,7 +284,7 @@ be bound to `%foreign-args' variable.
 
 Example:
 
-  (bui-plist-let '(:two 8 :great ! :bui is)
+  (bui-plist-let \\='(:two 8 :great ! :bui is)
       ((one :one 1)
        (two :two 2)
        (foo :smth))
