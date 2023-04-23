@@ -132,18 +132,18 @@ This string is used by `bui-info-insert-value-format'."
     (:ignore-void-values ignore-void-values t)
     (:multiline-prefix multiline-prefix t)
     (:title-format param-title-format t))
-  "Specifications for generating 'info' variables.
+  "Specifications for generating \\+`info' variables.
 See `bui-symbol-specifications' for details.")
 
 
 ;;; Wrappers for 'info' variables
 
 (defun bui-info-symbol (entry-type symbol)
-  "Return symbol for ENTRY-TYPE and 'info' buffer type."
+  "Return symbol for ENTRY-TYPE and \\+`info' buffer type."
   (bui-symbol entry-type 'info symbol))
 
 (defun bui-info-symbol-value (entry-type symbol)
-  "Return SYMBOL's value for ENTRY-TYPE and 'info' buffer type."
+  "Return SYMBOL's value for ENTRY-TYPE and \\+`info' buffer type."
   (bui-symbol-value entry-type 'info symbol))
 
 (defun bui-info-param-title (entry-type param)
@@ -151,7 +151,7 @@ See `bui-symbol-specifications' for details.")
   (bui-param-title entry-type 'info param))
 
 (defun bui-info-format (entry-type)
-  "Return 'info' format for ENTRY-TYPE."
+  "Return \\+`info' format for ENTRY-TYPE."
   (bui-info-symbol-value entry-type 'format))
 
 (defun bui-info-displayed-params (entry-type)
@@ -355,11 +355,11 @@ See `bui-get-time-string' for the meaning of TIME."
   "Keymap for `bui-info-mode' buffers.")
 
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
-  "Parent mode for displaying data in 'info' form."
+  "Parent mode for displaying data in \\+`info' form."
   (bui-info-initialize))
 
 (defun bui-info-initialize ()
-  "Set up the current 'info' buffer."
+  "Set up the current \\+`info' buffer."
   ;; Without this, syntactic fontification is performed, and it may
   ;; break highlighting.  For example, if there is a single "
   ;; (double-quote) character, the default syntactic fontification

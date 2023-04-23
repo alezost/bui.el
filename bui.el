@@ -166,7 +166,7 @@ is nil, along with the mentioned groups and variables,
                  '(,mode-name (bui-active-filter-predicates
                                bui-filter-mode-line-string))
                  ,(format "\
-Major mode for displaying '%S' entries in '%S' buffer.
+Major mode for displaying \\+`%S' entries in \\+`%S' buffer.
 
 \\{%S}"
                           entry-type buffer-type mode-map)

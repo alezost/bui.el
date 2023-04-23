@@ -114,14 +114,13 @@ See `bui-with-item' for details."
      ,@body))
 
 (defmacro bui-define-current-item-accessor (name)
-  "Define `bui-current-NAME' function to access NAME
-element of `bui-item' structure.
+  "Define accessor for `bui-item's NAME field.
 NAME should be a symbol."
   (let* ((name-str (symbol-name name))
          (accessor (intern (concat "bui-item-" name-str)))
          (fun-name (intern (concat "bui-current-" name-str)))
          (doc      (format "\
-Return '%s' of the current BUI buffer.
+Return \\+`%s' of the current BUI buffer.
 See `bui-item' for details."
                            name-str)))
     `(defun ,fun-name ()
@@ -141,22 +140,22 @@ See `bui-define-current-item-accessor' for details."
  entries entry-type buffer-type args)
 
 (defmacro bui-define-current-args-accessor (n prefix name)
-  "Define `PREFIX-NAME' function to access Nth element of 'args'
-field of `bui-item' structure.
-PREFIX and NAME should be symbols."
+  "Define PREFIX-NAME accessor for Nth element of \\+`args' field of
+`bui-item' structure.
+PREFIX and NAME should be symbols"
   (let* ((prefix-str (symbol-name prefix))
          (name-str   (symbol-name name))
          (fun-name   (intern (concat prefix-str "-" name-str)))
          (doc        (format "\
-Return '%s' of the current buffer.
-'%s' is the element number %d in 'args' field of `bui-item'."
+Return \\+`%s' of the current buffer.
+\\+`%s' is the element number %d in \\+`args' field of `bui-item'."
                              name-str name-str n)))
     `(defun ,fun-name ()
        ,doc
        (nth ,n (bui-current-args)))))
 
 (defmacro bui-define-current-args-accessors (prefix &rest names)
-  "Define `PREFIX-NAME' functions for NAMES.
+  "Define PREFIX-NAME functions for NAMES.
 See `bui-define-current-args-accessor' for details."
   (declare (indent 1))
   `(progn
@@ -186,7 +185,7 @@ See `bui-hint' for details.")
   '(bui-filter-by-regexp bui-filter-by-sexp)
   "List of available filter predicates.
 These predicates are used as completions for
-'\\[bui-enable-filter]' command to hide entries. See
+'\\[bui-enable-filter]' command to hide entries.  See
 `bui-active-filter-predicates' for details."
   :type '(repeat function)
   :group 'bui)
@@ -234,9 +233,8 @@ Interactively, prompt for PARAM and REGEXP."
 Evaluate SEXP and return its value.
 SEXP can use the ENTRY's parameters as symbols, e.g.:
 
-  '(or (string-match-p \"foo\" name)
-       (string-match-p \"bar\" synopsis))
-"
+  \\='(or (string-match-p \"foo\" name)
+       (string-match-p \"bar\" synopsis))"
   (interactive (list '<> (read--expression "sexp: ")))
   (dolist (param (bui-current-params))
     (setq sexp (cl-subst (bui-assq-value entry param)
@@ -471,7 +469,7 @@ interface.")
   "Return symbol suffix from symbol specification.")
 
 (defalias 'bui-symbol-specification-generate #'cl-third
-  "Return 'generate' value from symbol specification.")
+  "Return \\+`generate' value from symbol specification.")
 
 (defun bui-symbol-generate? (generate &optional reduced?)
   "Return non-nil if a symbol should be generated.
@@ -533,7 +531,7 @@ SPECIFICATIONS should have a form of `bui-symbol-specifications'."
 
 (defun bui-get-entries (entry-type buffer-type &optional args)
   "Return ENTRY-TYPE entries.
-Call an appropriate 'get-entries' function using ARGS as its arguments."
+Call an appropriate \\+`get-entries' function using ARGS as its arguments."
   (apply (bui-symbol-value entry-type buffer-type 'get-entries-function)
          args))
 
@@ -640,11 +638,11 @@ Use '\\[bui-disable-filters]' to remove filters")))))
   "Set up the current buffer for displaying BUFFER-ITEM.
 HISTORY should be one of the following:
 
-  `nil' or `add' - add it to history,
+  nil or \\+`add' - add it to history,
 
-  `no' - do not save BUFFER-ITEM in history,
+  \\+`no' - do not save BUFFER-ITEM in history,
 
-  `replace' - replace the current history item."
+  \\+`replace' - replace the current history item."
   (bui-with-item buffer-item
     (when %entries
       ;; At first, set buffer item so that its value can be used by the
