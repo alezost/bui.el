@@ -1,4 +1,4 @@
-;;; bui-entry.el --- 'Entry' type  -*- lexical-binding: t -*-
+;;; bui-entry.el --- `Entry' type  -*- lexical-binding: t -*-
 
 ;; Copyright © 2015–2026 Alex Kost <alezost@gmail.com>
 
@@ -17,8 +17,8 @@
 
 ;;; Commentary:
 
-;; This file provides an API for 'entry' type which is just an alist of
-;; KEY/VALUE pairs (KEY should be a symbol) with the required 'id' KEY.
+;; This file provides an API for `entry' type which is just an alist of
+;; KEY/VALUE pairs (KEY should be a symbol) with the required `id' KEY.
 
 ;;; Code:
 

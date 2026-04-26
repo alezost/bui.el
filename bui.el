@@ -23,15 +23,15 @@
 
 ;;; Commentary:
 
-;; BUI (Buffer User Interface) is a library for making 'list' (similar
-;; to "M-x list-packages") and 'info' (similar to customization buffers)
+;; BUI (Buffer User Interface) is a library for making `list' (similar
+;; to "M-x list-packages") and `info' (similar to customization buffers)
 ;; interfaces to display various data (packages, buffers, functions,
 ;; etc.).
 ;;
 ;; It is not an end-user package, it is a library that is intended to be
 ;; used by other packages.
 ;;
-;; Basically, at first you define 'list'/'info' interface using
+;; Basically, at first you define `list'/`info' interface using
 ;; `bui-define-interface' macro, and then you can make user commands
 ;; that will display entries using `bui-get-display-entries' and similar
 ;; functions.
@@ -116,13 +116,13 @@ is nil, along with the mentioned groups and variables,
            (reduced?          :reduced?))
         `(progn
            (defgroup ,group nil
-             ,(format "Displaying '%S' entries in '%S' buffer."
+             ,(format "Displaying `%S' entries in `%S' buffer."
                       entry-type buffer-type)
              :group ',entry-type
              :group ',bui-buffer-type)
 
            (defgroup ,faces-group nil
-             ,(format "Faces for displaying '%S' entries in '%S' buffer."
+             ,(format "Faces for displaying `%S' entries in `%S' buffer."
                       entry-type buffer-type)
              :group ',group
              :group ',(bui-entry-symbol entry-type 'faces)
@@ -166,7 +166,7 @@ is nil, along with the mentioned groups and variables,
                  '(,mode-name (bui-active-filter-predicates
                                bui-filter-mode-line-string))
                  ,(format "\
-Major mode for displaying '%S' entries in '%S' buffer.
+Major mode for displaying `%S' entries in `%S' buffer.
 
 \\{%S}"
                           entry-type buffer-type mode-map)

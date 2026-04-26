@@ -237,7 +237,7 @@ single argument."
   "Find FILE (using `bui-find-file-function') if it exists."
   (if (file-exists-p file)
       (funcall bui-find-file-function file)
-    (message "File '%s' does not exist." file)))
+    (message "File `%s' does not exist." file)))
 
 
 ;;; Symbols, keywords, plists
@@ -255,7 +255,7 @@ single argument."
   (intern (mapconcat #'symbol-name symbols "-")))
 
 (defun bui-symbol-title (symbol)
-  "Return SYMBOL's name, a string.
+  "Return SYMBOL name, a string.
 This is like `symbol-name', but fancier."
   (if (eq symbol 'id)
       "ID"
@@ -284,7 +284,7 @@ be bound to `%foreign-args' variable.
 
 Example:
 
-  (bui-plist-let '(:two 8 :great ! :bui is)
+  (bui-plist-let \\='(:two 8 :great ! :bui is)
       ((one :one 1)
        (two :two 2)
        (foo :smth))
@@ -368,7 +368,7 @@ Return a list of elements which satisfy all the PREDICATES."
 If NO-MESSAGE? is non-nil, do not display a message about it."
   (kill-new string)
   (unless no-message?
-    (message "'%s' has been added to the kill ring." string)))
+    (message "`%s' has been added to the kill ring." string)))
 
 (defmacro bui-define-groups (name &rest args)
   "Define `NAME' and `NAME-faces' customization groups.
@@ -392,10 +392,10 @@ Optional keywords:
         ((parent-group       :parent-group 'bui)
          (parent-faces-group :parent-faces-group 'bui-faces)
          (group-doc          :group-doc
-                             (format "Settings for '%s' buffers."
+                             (format "Settings for `%s' buffers."
                                      name-str))
          (faces-group-doc    :faces-group-doc
-                             (format "Faces for '%s' buffers."
+                             (format "Faces for `%s' buffers."
                                      name-str)))
       `(progn
          (defgroup ,name nil

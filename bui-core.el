@@ -120,7 +120,7 @@ NAME should be a symbol."
          (accessor (intern (concat "bui-item-" name-str)))
          (fun-name (intern (concat "bui-current-" name-str)))
          (doc      (format "\
-Return '%s' of the current BUI buffer.
+Return `%s' of the current BUI buffer.
 See `bui-item' for details."
                            name-str)))
     `(defun ,fun-name ()
@@ -140,15 +140,18 @@ See `bui-define-current-item-accessor' for details."
  entries entry-type buffer-type args)
 
 (defmacro bui-define-current-args-accessor (n prefix name)
-  "Define `PREFIX-NAME' function to access Nth element of 'args'
-field of `bui-item' structure.
+  "Define `PREFIX-NAME' function.
+
+This function will access Nth element of `args' field of `bui-item'
+structure.
+
 PREFIX and NAME should be symbols."
   (let* ((prefix-str (symbol-name prefix))
          (name-str   (symbol-name name))
          (fun-name   (intern (concat prefix-str "-" name-str)))
          (doc        (format "\
-Return '%s' of the current buffer.
-'%s' is the element number %d in 'args' field of `bui-item'."
+Return `%s' of the current buffer.
+`%s' is the element number %d in 'args' field of `bui-item'."
                              name-str name-str n)))
     `(defun ,fun-name ()
        ,doc
@@ -229,11 +232,11 @@ Interactively, prompt for PARAM and REGEXP."
                   (bui-get-string (bui-assq-value entry param))))
 
 (defun bui-filter-by-sexp (entry sexp)
-  "Filter the current entries using sexp.
+  "Filter the current entries using SEXP.
 Evaluate SEXP and return its value.
-SEXP can use the ENTRY's parameters as symbols, e.g.:
+SEXP can use the ENTRY parameters as symbols, e.g.:
 
-  '(or (string-match-p \"foo\" name)
+  \\='(or (string-match-p \"foo\" name)
        (string-match-p \"bar\" synopsis))
 "
   (interactive (list '<> (read--expression "sexp: ")))
@@ -257,7 +260,7 @@ only active one (remove the other active predicates)."
                         "Add filter: ")
                       bui-filter-predicates))
              current-prefix-arg)
-     (error "Filter predicates are not specified, see '%S' variable"
+     (error "Filter predicates are not specified, see `%S' variable"
             (bui-entry-symbol (bui-current-entry-type)
                               'filter-predicates))))
   (or (functionp predicate)
@@ -266,7 +269,7 @@ only active one (remove the other active predicates)."
   (if (if single?
           (equal (list predicate) bui-active-filter-predicates)
         (memq predicate bui-active-filter-predicates))
-      (message "Filter predicate '%S' already enabled" predicate)
+      (message "Filter predicate `%S' already enabled" predicate)
     (apply #'bui-filter-current-entries
            (if single?
                (list predicate)
@@ -289,7 +292,7 @@ only active one (remove the other active predicates)."
 
 (defcustom bui-hint-format "[%s]"
   "String used to format each key in `bui-hint'.
-This string should contain a single '%s' structure that will be
+This string should contain a single `%s' structure that will be
 replaced by a key string."
   :type 'string
   :group 'bui)
@@ -469,7 +472,7 @@ interface.")
   "Return symbol suffix from symbol specification.")
 
 (defalias 'bui-symbol-specification-generate #'cl-third
-  "Return 'generate' value from symbol specification.")
+  "Return `generate' value from symbol specification.")
 
 (defun bui-symbol-generate? (generate &optional reduced?)
   "Return non-nil if a symbol should be generated.
@@ -531,7 +534,7 @@ SPECIFICATIONS should have a form of `bui-symbol-specifications'."
 
 (defun bui-get-entries (entry-type buffer-type &optional args)
   "Return ENTRY-TYPE entries.
-Call an appropriate 'get-entries' function using ARGS as its arguments."
+Call an appropriate `get-entries' function using ARGS as its arguments."
   (apply (bui-symbol-value entry-type buffer-type 'get-entries-function)
          args))
 

@@ -1,4 +1,4 @@
-;;; bui-info.el --- 'Info' buffer interface for displaying data  -*- lexical-binding: t -*-
+;;; bui-info.el --- `Info' buffer interface for displaying data  -*- lexical-binding: t -*-
 
 ;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
 ;; Copyright © 2015 Ludovic Courtès <ludo@gnu.org>
@@ -18,7 +18,7 @@
 
 ;;; Commentary:
 
-;; This file provides 'info' (help-like) buffer interface for displaying
+;; This file provides `info' (help-like) buffer interface for displaying
 ;; an arbitrary data.
 
 ;;; Code:
@@ -43,7 +43,7 @@
   :group 'bui-info-faces)
 
 
-;;; General 'info' variables
+;;; General `info' variables
 
 (defvar bui-info-format nil
   "List of methods for inserting entries.
@@ -100,7 +100,7 @@ If nil, insert text parameters in a raw form."
 
 (defcustom bui-info-param-title-format "%-18s: "
   "String used to format a title of a parameter.
-It should be a '%s'-sequence.  After inserting a title formatted
+It should be a `%s'-sequence.  After inserting a title formatted
 with this string, a value of the parameter is inserted.
 This string is used by `bui-info-insert-title-format'."
   :type 'string
@@ -132,18 +132,18 @@ This string is used by `bui-info-insert-value-format'."
     (:ignore-void-values ignore-void-values t)
     (:multiline-prefix multiline-prefix t)
     (:title-format param-title-format t))
-  "Specifications for generating 'info' variables.
+  "Specifications for generating `info' variables.
 See `bui-symbol-specifications' for details.")
 
 
-;;; Wrappers for 'info' variables
+;;; Wrappers for `info' variables
 
 (defun bui-info-symbol (entry-type symbol)
-  "Return symbol for ENTRY-TYPE and 'info' buffer type."
+  "Return symbol for ENTRY-TYPE and `info' buffer type."
   (bui-symbol entry-type 'info symbol))
 
 (defun bui-info-symbol-value (entry-type symbol)
-  "Return SYMBOL's value for ENTRY-TYPE and 'info' buffer type."
+  "Return SYMBOL's value for ENTRY-TYPE and `info' buffer type."
   (bui-symbol-value entry-type 'info symbol))
 
 (defun bui-info-param-title (entry-type param)
@@ -151,7 +151,7 @@ See `bui-symbol-specifications' for details.")
   (bui-param-title entry-type 'info param))
 
 (defun bui-info-format (entry-type)
-  "Return 'info' format for ENTRY-TYPE."
+  "Return `info' format for ENTRY-TYPE."
   (bui-info-symbol-value entry-type 'format))
 
 (defun bui-info-displayed-params (entry-type)
@@ -195,7 +195,7 @@ See `bui-symbol-specifications' for details.")
      (lambda (title)
        (apply (bui-info-title-function fun-or-alias)
               title rest-args)))
-    (_ (error "Unknown title method '%S'" method))))
+    (_ (error "Unknown title method `%S'" method))))
 
 (defun bui-info-value-method->function (method)
   "Convert value METHOD into a function to insert a value."
@@ -206,7 +206,7 @@ See `bui-symbol-specifications' for details.")
      (lambda (value _)
        (apply (bui-info-value-function fun-or-alias)
               value rest-args)))
-    (_ (error "Unknown value method '%S'" method))))
+    (_ (error "Unknown value method `%S'" method))))
 
 (defun bui-info-insert-entries (entries entry-type)
   "Display ENTRY-TYPE ENTRIES in the current info buffer."
@@ -251,7 +251,7 @@ ENTRY-TYPE is a type of ENTRY."
             ((and empty? boolean?) (insert bui-false-string))
             (t (funcall insert-value value entry)))
            (bui-newline)))))
-    (_ (error "Unknown format specification '%S'" format-spec))))
+    (_ (error "Unknown format specification `%S'" format-spec))))
 
 (defun bui-info-insert-title-simple (title &optional face)
   "Insert \"TITLE: \" string at point.
@@ -355,11 +355,11 @@ See `bui-get-time-string' for the meaning of TIME."
   "Keymap for `bui-info-mode' buffers.")
 
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
-  "Parent mode for displaying data in 'info' form."
+  "Parent mode for displaying data in `info' form."
   (bui-info-initialize))
 
 (defun bui-info-initialize ()
-  "Set up the current 'info' buffer."
+  "Set up the current `info' buffer."
   ;; Without this, syntactic fontification is performed, and it may
   ;; break highlighting.  For example, if there is a single "
   ;; (double-quote) character, the default syntactic fontification
