@@ -1,6 +1,6 @@
 ;;; bui-entry.el --- 'Entry' type  -*- lexical-binding: t -*-
 
-;; Copyright © 2015-2016 Alex Kost <alezost@gmail.com>
+;; Copyright © 2015–2026 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -35,14 +35,15 @@
 (defun bui-entry-value (entry param)
   "Return value of the ENTRY PARAM.
 If ENTRY does not have PARAM at all, return `bui-void-value'."
-  (--if-let (assq param entry)
-      (cdr it)
+  (if-let* ((val (assq param entry)))
+      (cdr val)
     bui-void-value))
 
 (defun bui-entry-non-void-value (entry param)
   "Like `bui-entry-value' but return nil if value is void."
-  (--when-let (bui-entry-value entry param)
-    (and (not (bui-void-value? it)) it)))
+  (when-let* ((val (bui-entry-value entry param)))
+    (and (not (bui-void-value? val))
+         val)))
 
 (defun bui-entry-id (entry)
   "Return ENTRY ID."

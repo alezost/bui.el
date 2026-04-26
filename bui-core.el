@@ -1,6 +1,6 @@
 ;;; bui-core.el --- Core functionality for BUI  -*- lexical-binding: t -*-
 
-;; Copyright © 2014–2017, 2021 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2026 Alex Kost <alezost@gmail.com>
 ;; Copyright © 2020 Joe Bloggs <vapniks@yahoo.com>
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,6 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'dash)
 (require 'bui-history)
 (require 'bui-utils)
 
@@ -251,17 +250,16 @@ available predicates.
 If SINGLE? is non-nil (with prefix argument), make PREDICATE the
 only active one (remove the other active predicates)."
   (interactive
-   (let ((predicates bui-filter-predicates))
-     (if (null predicates)
-         (error "Filter predicates are not specified, see '%S' variable"
-                (bui-entry-symbol (bui-current-entry-type)
-                                  'filter-predicates))
+   (if bui-filter-predicates
        (list (intern (completing-read
                       (if current-prefix-arg
                           "Enable single filter: "
                         "Add filter: ")
-                      predicates))
-             current-prefix-arg))))
+                      bui-filter-predicates))
+             current-prefix-arg)
+     (error "Filter predicates are not specified, see '%S' variable"
+            (bui-entry-symbol (bui-current-entry-type)
+                              'filter-predicates))))
   (or (functionp predicate)
       (error "Wrong filter predicate: %S" predicate))
   (setq predicate (bui-apply-interactive predicate))
@@ -560,28 +558,27 @@ Call an appropriate 'get-entries' function using ARGS as its arguments."
   (let ((inhibit-read-only t))
     (erase-buffer)
     (bui-mode-enable entry-type buffer-type)
-    (let ((filtered-entries (apply #'bui-filter
-                                   entries bui-active-filter-predicates)))
-      (if filtered-entries
-          (bui-insert-entries filtered-entries entry-type buffer-type)
-        (when entries
-          (message (substitute-command-keys
-                    "Everything is filtered out :-)
-Use '\\[bui-disable-filters]' to remove filters")))))
+    (if-let* ((filtered-entries (apply #'bui-filter
+                                       entries bui-active-filter-predicates)))
+        (bui-insert-entries filtered-entries entry-type buffer-type)
+      (when entries
+        (message (substitute-command-keys
+                  "Everything is filtered out :-)
+Use '\\[bui-disable-filters]' to remove filters"))))
     (goto-char (point-min))))
 
 (defun bui-show-entries (entries entry-type buffer-type)
   "Show ENTRY-TYPE ENTRIES in the current BUFFER-TYPE buffer."
-  (--if-let (bui-symbol-value entry-type buffer-type
-                              'show-entries-function)
-      (funcall it entries)
+  (if-let* ((fun (bui-symbol-value entry-type buffer-type
+                                   'show-entries-function)))
+      (funcall fun entries)
     (bui-show-entries-default entries entry-type buffer-type)))
 
 (defun bui-message (entries entry-type buffer-type &optional args)
   "Display a message for BUFFER-ITEM after showing entries."
-  (--when-let (bui-symbol-value entry-type buffer-type
-                                'message-function)
-    (apply it entries args)))
+  (when-let* ((fun (bui-symbol-value entry-type buffer-type
+                                     'message-function)))
+    (apply fun entries args)))
 
 (defun bui-buffer-name (entry-type buffer-type &optional args)
   "Return name of BUFFER-TYPE buffer for displaying ENTRY-TYPE entries."
