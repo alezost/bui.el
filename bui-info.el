@@ -1,6 +1,6 @@
 ;;; bui-info.el --- `Info' buffer interface for displaying data  -*- lexical-binding: t -*-
 
-;; Copyright © 2014–2017 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2026 Alex Kost <alezost@gmail.com>
 ;; Copyright © 2015 Ludovic Courtès <ludo@gnu.org>
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
 ;;; Code:
 
-(require 'dash)
+(require 'seq)
 (require 'bui-core)
 (require 'bui-entry)
 (require 'bui-button)
@@ -156,10 +156,9 @@ See `bui-symbol-specifications' for details.")
 
 (defun bui-info-displayed-params (entry-type)
   "Return a list of ENTRY-TYPE parameters that should be displayed."
-  (-non-nil
-   (--map (pcase it
-            (`(,param . ,_) param))
-          (bui-info-format entry-type))))
+  (seq-keep (pcase-lambda (`(,param . ,_))
+              param)
+            (bui-info-format entry-type)))
 
 
 ;;; Inserting entries

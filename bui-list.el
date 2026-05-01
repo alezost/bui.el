@@ -1,6 +1,6 @@
 ;;; bui-list.el --- `List' buffer interface for displaying data  -*- lexical-binding: t -*-
 
-;; Copyright © 2014–2018 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2026 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'dash)
+(require 'seq)
 (require 'tabulated-list)
 (require 'bui-core)
 (require 'bui-button)
@@ -367,14 +367,14 @@ If MARK-NAMES are not specified, use all marks from
   (or mark-names
       (setq mark-names
             (delq 'empty (mapcar #'car bui-list-marks))))
-  (-filter (-lambda ((_id name . _))
-             (memq name mark-names))
-           bui-list-marked))
+  (seq-filter (pcase-lambda (`(,_id ,name . ,_))
+                (memq name mark-names))
+              bui-list-marked))
 
 (defun bui-list-get-marked-args (mark-name)
   "Return list of (ID . ARGS) elements from lines marked with MARK-NAME.
 See `bui-list-marked' for the meaning of ARGS."
-  (mapcar (-lambda ((id _name . args))
+  (mapcar (pcase-lambda (`(,id ,_name . ,args))
             (cons id args))
           (bui-list-get-marked mark-name)))
 

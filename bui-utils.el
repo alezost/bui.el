@@ -23,7 +23,7 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'dash)
+(require 'seq)
 
 (defcustom bui-true-string "Yes"
   "String used if the value of a parameter is t."
@@ -154,7 +154,7 @@ If COLUMN is non-nil, fill STR to this column."
 ;; `bui-newline' exists because `newline' does too much.
 (defun bui-newline (&optional n)
   "Insert N (1 by default) number of newlines at point."
-  (--dotimes (or n 1)
+  (dotimes (_ (or n 1))
     (insert "\n")))
 
 (defmacro bui-with-indent (indent &rest body)
@@ -359,9 +359,11 @@ accessed with KEYS."
 Return a list of elements which satisfy all the PREDICATES."
   (if (null predicates)
       list
-    (-filter (lambda (element)
-               (--every? (funcall it element) predicates))
-             list)))
+    (seq-filter (lambda (element)
+                  (seq-every-p (lambda (pred)
+                                 (funcall pred element))
+                               predicates))
+                list)))
 
 (defun bui-copy-as-kill (string &optional no-message?)
   "Put STRING into `kill-ring'.
