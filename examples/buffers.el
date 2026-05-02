@@ -1,6 +1,6 @@
-;;; buffers.el --- List of buffers and buffer info
+;;; buffers.el --- List of buffers and buffer info  -*- lexical-binding: t; -*-
 
-;; Copyright © 2016–2017, 2021 Alex Kost <alezost@gmail.com>
+;; Copyright © 2016–2026 Alex Kost <alezost@gmail.com>
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl-lib))
 (require 'bui)
 (require 'help-mode)  ; for `help-function' button
 
@@ -104,7 +105,7 @@
   (not (buffers-buffer-visiting-file? entry)))
 
 
-;;; 'Info' interface
+;;; `info' interface
 
 (bui-define-interface buffers info
   :format '((name format buffers-info-insert-name)
@@ -119,7 +120,7 @@
   'action 'buffers-describe-mode-function)
 
 (defun buffers-info-insert-name (name entry)
-  (bui-info-insert-value-simple (bui-entry-value entry 'name)
+  (bui-info-insert-value-simple name
                                 'mode-line-buffer-id)
   (bui-insert-indent)
   (bui-insert-action-button
@@ -130,7 +131,7 @@
    'buffer (bui-entry-id entry)))
 
 
-;;; 'List' interface
+;;; `list' interface
 
 (bui-define-interface buffers list
   :buffer-name "*Buffers*"
@@ -145,8 +146,8 @@
   :sort-key '(name))
 
 (let ((map buffers-list-mode-map))
-  (define-key map (kbd "RET") 'buffers-list-switch-to-buffer)
-  (define-key map (kbd "k")   'buffers-list-kill-buffers))
+  (keymap-set map "RET" #'buffers-list-switch-to-buffer)
+  (keymap-set map "k"   #'buffers-list-kill-buffers))
 
 (defvar buffers-list-default-hint
   '(("\\[buffers-list-switch-to-buffer]") " switch to buffer;\n"
@@ -166,7 +167,7 @@ MODE may be nil."
         'action 'buffers-describe-mode-function))
 
 (defun buffers-list-describe (&rest buffers)
-  "Display 'info' buffer for BUFFERS."
+  "Display `info' buffer for BUFFERS."
   (bui-get-display-entries 'buffers 'info (cons 'id buffers)))
 
 (defun buffers-list-switch-to-buffer ()
