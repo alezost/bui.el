@@ -345,13 +345,10 @@ See `bui-get-time-string' for the meaning of TIME."
 
 ;;; Major mode
 
-(defvar bui-info-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent
-     map (make-composed-keymap (list bui-map button-buffer-map)
-                               special-mode-map))
-    map)
-  "Keymap for `bui-info-mode' buffers.")
+(defvar-keymap bui-info-mode-map
+  :parent (make-composed-keymap (list bui-map button-buffer-map)
+                                special-mode-map)
+  :doc "Keymap for `bui-info-mode' buffers.")
 
 (define-derived-mode bui-info-mode special-mode "BUI-Info"
   "Parent mode for displaying data in `info' form."

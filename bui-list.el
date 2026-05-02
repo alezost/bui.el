@@ -475,23 +475,20 @@ Same as `tabulated-list-sort', but also restore marks after sorting."
 
 ;;; Major mode
 
-(defvar bui-list-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent
-     map (make-composed-keymap bui-map
-                               tabulated-list-mode-map))
-    (define-key map (kbd "i")   'bui-list-describe)
-    (define-key map (kbd "RET") 'bui-list-describe)
-    (define-key map (kbd "*")   'bui-list-mark)
-    (define-key map (kbd "m")   'bui-list-mark)
-    (define-key map (kbd "M")   'bui-list-mark-all)
-    (define-key map (kbd "u")   'bui-list-unmark)
-    (define-key map (kbd "DEL") 'bui-list-unmark-backward)
-    (define-key map (kbd "U")   'bui-list-unmark-all)
-    (define-key map (kbd "s")   'bui-list-sort)
-    (define-key map [remap tabulated-list-sort] 'bui-list-sort)
-    map)
-  "Keymap for `bui-list-mode' buffers.")
+(defvar-keymap bui-list-mode-map
+  :parent (make-composed-keymap bui-map
+                                tabulated-list-mode-map)
+  :doc "Keymap for `bui-list-mode' buffers."
+  "i"   #'bui-list-describe
+  "RET" #'bui-list-describe
+  "*"   #'bui-list-mark
+  "m"   #'bui-list-mark
+  "M"   #'bui-list-mark-all
+  "u"   #'bui-list-unmark
+  "DEL" #'bui-list-unmark-backward
+  "U"   #'bui-list-unmark-all
+  "s"   #'bui-list-sort
+  "<remap> <tabulated-list-sort>" #'bui-list-sort)
 
 (defvar bui-list-mark-hint
   '(("\\[bui-list-mark]") " mark; "

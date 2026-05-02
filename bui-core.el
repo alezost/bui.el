@@ -32,19 +32,22 @@
   :parent-faces-group faces
   :group-doc "Settings for Buffer User Interface.")
 
-(defvar bui-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-b") 'bui-history-back)
-    (define-key map (kbd "C-c C-f") 'bui-history-forward)
-    (define-key map (kbd "l") 'bui-history-back)
-    (define-key map (kbd "r") 'bui-history-forward)
-    (define-key map (kbd "g") 'revert-buffer)
-    (define-key map (kbd "R") 'bui-redisplay)
-    (define-key map (kbd "f") 'bui-filter-map)
-    (define-key map (kbd "h") 'bui-show-hint)
-    (define-key map [remap self-insert-command] 'bui-show-hint)
-    map)
-  "Parent keymap for all BUI modes.")
+(defvar-keymap bui-filter-map
+  :doc "Keymap with filter commands for BUI modes."
+  "f" #'bui-enable-filter
+  "d" #'bui-disable-filters)
+
+(defvar-keymap bui-map
+  :doc "Parent keymap for all BUI modes."
+  "C-c C-b" #'bui-history-back
+  "C-c C-f" #'bui-history-forward
+  "l" #'bui-history-back
+  "r" #'bui-history-forward
+  "g" #'revert-buffer
+  "R" #'bui-redisplay
+  "f" bui-filter-map
+  "h" #'bui-show-hint
+  "<remap> <self-insert-command>" #'bui-show-hint)
 
 (defvar bui-history-hint
   '("History: "
@@ -169,14 +172,6 @@ See `bui-define-current-args-accessor' for details."
 
 
 ;;; Filtering
-
-(defvar bui-filter-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "f") 'bui-enable-filter)
-    (define-key map (kbd "d") 'bui-disable-filters)
-    map)
-  "Keymap with filter commands for BUI modes.")
-(fset 'bui-filter-map bui-filter-map)
 
 (defvar bui-filter-hint
   '(("\\[bui-enable-filter]") " enable filter; "

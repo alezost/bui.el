@@ -50,12 +50,10 @@
   "Mouse face used for action buttons."
   :group 'bui-faces)
 
-(defvar bui-button-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map button-map)
-    (define-key map (kbd "c") 'bui-button-copy-label)
-    map)
-  "Keymap for BUI buttons.")
+(defvar-keymap bui-button-map
+  :parent button-map
+  :doc "Keymap for BUI buttons."
+  "c" #'bui-button-copy-label)
 
 (define-button-type 'bui
   'keymap bui-button-map
