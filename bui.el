@@ -1,9 +1,9 @@
 ;;; bui.el --- Buffer interface library  -*- lexical-binding: t -*-
 
-;; Copyright © 2014-2018 Alex Kost <alezost@gmail.com>
+;; Copyright © 2014–2026 Alex Kost <alezost@gmail.com>
 
 ;; Author: Alex Kost <alezost@gmail.com>
-;; Version: 1.2.1
+;; Version: 1.3
 ;; URL: https://github.com/alezost/bui.el
 ;; Keywords: tools
 ;; Package-Requires: ((emacs "29.1"))
